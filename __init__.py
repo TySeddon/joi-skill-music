@@ -39,12 +39,14 @@ class JoiMusicSkill(MycroftSkill):
 
 ###########################################
 
-    @intent_handler(IntentBuilder('PlayMusicIntent').require('PlayMusic'))
+    @intent_handler(IntentBuilder('PlayMusicIntent')
+                    .require('Music')
+                    .optionally("Play"))
     def handle_play_music_intent(self, message):
         """ This is an Adapt intent handler, it is triggered by a keyword."""
         # start the session
         self.speak_dialog("Session_Start")
-        
+
         # get list of playlists
         # todo:
         # choose a playlist
@@ -58,6 +60,8 @@ class JoiMusicSkill(MycroftSkill):
                               "artist": "Bobby Darin",
                               "song_name": "You're the Reason I'm Living"
                           })
+
+        self.acknowledge()
 
 
 
