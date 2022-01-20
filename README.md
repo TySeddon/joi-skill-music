@@ -1,8 +1,15 @@
 # joi-skill-music
 
-## Install Skill
-From the Raspberry Pi 
-    mycroft-msm https://github.com/TySeddon/joi-skill-music.git
+## Managing Skill Installations
+All of these Mycroft kills Manager (mycroft-msm) commands are executed on the Raspberry Pi
+
+### Install Skill
+    cd ~/mycroft-core/bin
+    ./mycroft-msm install https://github.com/TySeddon/joi-skill-music.git
+
+### Remove Skill    
+    cd ~/mycroft-core/bin
+    ./mycroft-msm remove joi-skill-music
 
 ## Mycroft Terminology
 
