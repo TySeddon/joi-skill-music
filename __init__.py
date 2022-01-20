@@ -1,4 +1,4 @@
-from random import random
+import random
 from adapt.intent import IntentBuilder
 from mycroft import MycroftSkill, intent_handler
 
