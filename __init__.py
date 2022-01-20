@@ -1,3 +1,4 @@
+from random import random
 from adapt.intent import IntentBuilder
 from mycroft import MycroftSkill, intent_handler
 
@@ -39,6 +40,16 @@ class JoiMusicSkill(MycroftSkill):
 
 ###########################################
 
+    def get_playlist(self):
+        # todo: hardcode
+        return [("Bobby Darin","You're the Reason I'm Living"),
+                ("Elvis Presley", "Slowly But Surely"),
+                ("Lesley Gore","It's My Party")]
+
+    def choose_song(self,playlist):
+        # todo: hardcode
+        return random.choice(playlist)    
+
     @intent_handler(IntentBuilder('PlayMusicIntent')
                     .require('Music')
                     .optionally("Play"))
@@ -49,19 +60,16 @@ class JoiMusicSkill(MycroftSkill):
 
         # get list of playlists
         # todo:
+
         # choose a playlist
-        # todo:
+        playlist = self.get_playlist()
         # get song and artist name from first song in playlist
-        # todo:
+        (artist,song_name) = self.choose_song(playlist)
 
         # introduce the next song
         self.speak_dialog("Song_Intro",
-                          {
-                              "artist": "Bobby Darin",
-                              "song_name": "You're the Reason I'm Living"
-                          })
+                          {"artist": artist,"song_name": song_name})
 
-        self.acknowledge()
 
 
 
