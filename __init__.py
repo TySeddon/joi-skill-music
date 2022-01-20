@@ -18,6 +18,8 @@ class JoiMusicSkill(MycroftSkill):
         settings will be available."""
         my_setting = self.settings.get('my_setting')
 
+###########################################
+
     @intent_handler(IntentBuilder('ThankYouIntent').require('ThankYouKeyword'))
     def handle_thank_you_intent(self, message):
         """ This is an Adapt intent handler, it is triggered by a keyword."""
@@ -41,20 +43,21 @@ class JoiMusicSkill(MycroftSkill):
 ###########################################
 
     def get_playlist(self):
+        """ Get the songs and associated artists in a play list """
         # todo: hardcode
         return [("Bobby Darin","You're the Reason I'm Living"),
                 ("Elvis Presley", "Slowly But Surely"),
                 ("Lesley Gore","It's My Party")]
 
     def choose_song(self,playlist):
+        """ Choose a song from the playlist """
         # todo: hardcode
         return random.choice(playlist)    
 
-    @intent_handler(IntentBuilder('PlayMusicIntent')
-                    .require('Music')
-                    .optionally("Play"))
+    @intent_handler(IntentBuilder('PlayMusicIntent').require('Music').optionally("Play"))
     def handle_play_music_intent(self, message):
         """ This is an Adapt intent handler, it is triggered by a keyword."""
+
         # start the session
         self.speak_dialog("Session_Start")
 
