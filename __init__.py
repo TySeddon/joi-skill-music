@@ -43,6 +43,7 @@ class JoiMusicSkill(MycroftSkill):
     def handle_thank_you_intent(self, message):
         """ This is an Adapt intent handler, it is triggered by a keyword."""
         self.speak_dialog("Session_Start")
+        self.speak_dialog("Song_Intro")
 
 
 
