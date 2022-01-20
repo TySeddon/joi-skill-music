@@ -11,6 +11,16 @@ All of these Mycroft kills Manager (mycroft-msm) commands are executed on the Ra
     cd ~/mycroft-core/bin
     ./mycroft-msm remove joi-skill-music
 
+### Bash Script to automate updating of skills
+#!/bin/sh
+cd ~/mycroft-core/bin
+echo "----Uninstalling joi-skill-music----"
+./mycroft-msm remove joi-skill-music
+echo "----Installing joi-skill-music----"
+./mycroft-msm install https://github.com/TySeddon/joi-skill-music.git
+
+
+
 ## Mycroft Terminology
 
 * **utterance** - An utterance is a phrase spoken by the User, after the User says the Wake Word. what's the weather like in Toronto? is an utterance.

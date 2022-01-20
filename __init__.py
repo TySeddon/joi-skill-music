@@ -37,6 +37,17 @@ class JoiMusicSkill(MycroftSkill):
                       "info, debug, warning, error, and exception.")
         self.speak_dialog("hello.world")
 
+###########################################
+
+    @intent_handler(IntentBuilder('PlayMusicIntent').require('PlayMusic'))
+    def handle_thank_you_intent(self, message):
+        """ This is an Adapt intent handler, it is triggered by a keyword."""
+        self.speak_dialog("Session_Start")
+
+
+
+
+###########################################
 
     def converse(self, utterances, lang):
         """ The converse method can be used to handle follow up utterances 
