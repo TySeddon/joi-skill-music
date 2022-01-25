@@ -3,22 +3,22 @@ from spotipy.oauth2 import SpotifyOAuth
 from pprint import pprint
 from time import sleep
 from globals import *
-
-# define scopes required by Joi and web playback
-# https://github.com/spotify/web-playback-sdk/issues/11
-scope = "user-read-playback-state,user-modify-playback-state,streaming,user-read-email,user-read-private"
+import webbrowser
 
 client_credentials_manager=SpotifyOAuth(
     client_id=SPOTIPY_CLIENT_ID, 
     client_secret=SPOTIPY_CLIENT_SECRET,
     redirect_uri=SPOTIPY_REDIRECT_URI,
     show_dialog=True,
-    scope=scope)
+    scope=SPOTIPY_SCOPES)
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 # get the access token.  Can share this with the web client
 token = client_credentials_manager.get_access_token()
 pprint(token)
+
+webbrowser.open("http://127.0.0.1:8000/joi/spotify?token=%s" % (token['access_token']))
+sleep(2)
 
 def get_joi_device(sp):
     result = sp.devices()

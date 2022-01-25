@@ -1,4 +1,4 @@
-Let's listen to {artist}.
+Let's listen to {artist_name}.
 Here's the song {song_name}.
-Playing, {song_name} by {artist}.
-This is a good one by {artist}.
+Playing, {song_name} by {artist_name}.
+This is a good one by {artist_name}.

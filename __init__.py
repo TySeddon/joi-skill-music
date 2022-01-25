@@ -1,9 +1,13 @@
 import random
+from uuid import UUID
 from adapt.intent import IntentBuilder
 from mycroft import MycroftSkill, intent_handler
-
-SPOTIPY_CLIENT_ID = '0fbe765d4ba54f05bf4537f108e8fab9'
-SPOTIPY_CLIENT_SECRET = 'aa2869680ea84d05ba89583f2ca84d8c'
+from scripts.spotify_playlists import shuffle_tracks
+from spotify import Spotify
+import globals
+import webbrowser
+from time import sleep
+import uuid
 
 class JoiMusicSkill(MycroftSkill):
     def __init__(self):
@@ -45,17 +49,50 @@ class JoiMusicSkill(MycroftSkill):
 
 ###########################################
 
-    def get_playlist(self):
-        """ Get the songs and associated artists in a play list """
-        # todo: hardcode
-        return [("Bobby Darin","You're the Reason I'm Living"),
-                ("Elvis Presley", "Slowly But Surely"),
-                ("Lesley Gore","It's My Party")]
+    # def shuffle_tracks(tracks):
+    #     return random.sample(tracks,3)
 
-    def choose_song(self,playlist):
-        """ Choose a song from the playlist """
-        # todo: hardcode
-        return random.choice(playlist)    
+    # def get_playlist(self):
+    #     """ Get the songs and associated artists in a play list """
+    #     # todo: hardcode
+    #     return [("Bobby Darin","You're the Reason I'm Living"),
+    #             ("Elvis Presley", "Slowly But Surely"),
+    #             ("Lesley Gore","It's My Party")]
+
+    # def choose_song(self,playlist):
+    #     """ Choose a song from the playlist """
+    #     # todo: hardcode
+    #     return random.choice(playlist)    
+
+    def get_next_track(self):
+        if len(self.session_tracks) > 0:
+            track = self.session_tracks.pop(0)
+            return track
+        else:
+            return None
+
+    def start_next_song(self):
+        # get song and artist name from first song in playlist
+        track = self.get_next_track()
+        if track is not None:
+            # introduce the next song
+            self.speak_dialog("Song_Intro",
+                            {"artist_name": track.artists[0].name,
+                            "song_name": track.name})
+            # play the song
+            self.spotify.start_playback(self.player_name, track.uri)
+            return True
+        else:
+            return False
+
+    def handle_session_end(self):
+        pass
+
+    def play_songs(self):
+        while self.start_next_song():
+            # periodically check to see if song is done
+            pass
+        self.handle_session_end()
 
     @intent_handler(IntentBuilder('PlayMusicIntent').require('Music').optionally("Play"))
     def handle_play_music_intent(self, message):
@@ -64,19 +101,24 @@ class JoiMusicSkill(MycroftSkill):
         # start the session
         self.speak_dialog("Session_Start")
 
+        # login to Spotify
+        self.spotify = Spotify()
+
         # get list of playlists
-        # todo:
+        playlists = self.spotify.get_playlists()
 
         # choose a playlist
-        playlist = self.get_playlist()
-        # get song and artist name from first song in playlist
-        (artist,song_name) = self.choose_song(playlist)
+        playlist = random.choice(playlists)
+        tracks = self.spotify.get_playlist_tracks(playlist.id)
 
-        # introduce the next song
-        self.speak_dialog("Song_Intro",
-                          {"artist": artist,"song_name": song_name})
+        # create a random set of tracks for this session
+        self.session_tracks = shuffle_tracks(tracks)
 
+        # launch music player
+        self.player_name = "Joi-%s" % (uuid.uuid4())
+        webbrowser.open("http://127.0.0.1:8000/joi/spotify?name=%s&token=%s" % (self.player_name, self.spotify.access_token))
 
+        self.play_songs()
 
 
 

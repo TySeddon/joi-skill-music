@@ -5,13 +5,12 @@ from time import sleep
 from globals import *
 import json
 
-scope = "user-read-playback-state,user-modify-playback-state,streaming,user-read-email,user-read-private"
 client_credentials_manager=SpotifyOAuth(
     client_id=SPOTIPY_CLIENT_ID, 
     client_secret=SPOTIPY_CLIENT_SECRET,
     redirect_uri=SPOTIPY_REDIRECT_URI,
     show_dialog=True,
-    scope=scope)
+    scope=SPOTIPY_SCOPES)
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 # get the access token.  Can share this with the web client
