@@ -51,3 +51,14 @@ class Spotify():
         device = self.get_device_by_name(player_name)
         self.spotify_client.start_playback(device_id=device.id, 
                   uris=[track_uri])
+
+    def get_playback_state(self):
+        result = self.spotify_client.current_playback()
+        state = munchify(result)
+        return munchify({
+            'is_playing' : state.is_playing,
+            'progress_ms' : state.progress_ms,
+            'duration_ms' : state.item.duration_ms,
+            'remaining_ms' : state.item.duration_ms - state.progress_ms,
+            'progress_pct' : state.progress_ms / state.item.duration_ms,
+        })
