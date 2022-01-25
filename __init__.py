@@ -2,6 +2,9 @@ import random
 from adapt.intent import IntentBuilder
 from mycroft import MycroftSkill, intent_handler
 
+SPOTIPY_CLIENT_ID = '0fbe765d4ba54f05bf4537f108e8fab9'
+SPOTIPY_CLIENT_SECRET = 'aa2869680ea84d05ba89583f2ca84d8c'
+
 class JoiMusicSkill(MycroftSkill):
     def __init__(self):
         """ The __init__ method is called when the Skill is first constructed.
