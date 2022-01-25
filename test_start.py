@@ -32,34 +32,45 @@ def get_next_track():
     else:
         return None
 
-def play_next_track():
-    track = get_next_track()
-    if track is not None:
-        sp.start_playback(player_name, track.uri)
-        return True
-    else:
-        return False        
+# def play_next_track():
+#     track = get_next_track()
+#     if track is not None:
+#         sp.start_playback(player_name, track.uri)
+#         return True
+#     else:
+#         return False        
 
 async def poll_for_done():
     while True:
         play_state = sp.get_playback_state()
-        pprint(play_state)
+        print('%.2f %%' % (play_state.progress_pct * 100))
         if play_state.progress_pct > 0.02:
             return "All Done"
         last_progress = play_state.progress_pct
         sleep(1)
 
-def handle_song_done():
-    playing_next = play_next_track()
-    if playing_next:
-        asyncio.run(wait_for_done())
-    else:
-        print("That was the last song")
+# def handle_song_done():
+#     playing_next = play_next_track()
+#     if playing_next:
+#         asyncio.run(wait_for_done())
+#     else:
+#         print("That was the last song")
 
-async def wait_for_done():
-    task = asyncio.create_task(poll_for_done())
-    task.add_done_callback(lambda x: handle_song_done())
+# async def wait_for_done():
+#     task = asyncio.create_task(poll_for_done())
+#     task.add_done_callback(lambda x: handle_song_done())
 
-play_next_track()
-asyncio.run(wait_for_done())
+def song_intro():
+    print("Song intro")
+
+def song_followup():
+    print("Follow-up")
+
+track = get_next_track()
+while track:
+    song_intro()
+    sp.start_playback(player_name, track.uri)
+    asyncio.run(poll_for_done())
+    song_followup()
+    track = get_next_track()
 
