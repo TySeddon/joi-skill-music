@@ -180,6 +180,12 @@ class JoiMusicSkill(MycroftSkill):
         self.play_state.is_playing = False
         self.stop_monitor()        
 
+    def handle_resume(self):
+        self.log.info("handle_resume")
+        self.spotify.resume_playback(self.player_name)
+        self.play_state.is_playing = True
+        self.start_monitor()
+
     def handle_listener_started(self, message):
         self.log.info("handle_listener_started")
 
@@ -193,20 +199,14 @@ class JoiMusicSkill(MycroftSkill):
                 self.check_for_idle, None, 1, name="IdleCheck"
             )       
 
-    def handle_resume(self):
-        self.log.info("handle_resume")
-        self.spotify.resume_playback(self.player_name)
-        self.play_state.is_playing = True
-        self.start_monitor()
-
     def check_for_idle(self):
         self.log.info("check_for_idle")
         if self.play_state.is_playing:
             self.cancel_scheduled_event("IdleCheck")
             return
         self.idle_count += 1
-        if self.idle_count >= 2:
-            # Resume playback after 2 seconds of being idle
+        if self.idle_count >= 3:
+            # Resume playback after 3 seconds of being idle
             self.cancel_scheduled_event("IdleCheck")
             self.handle_resume()
 
@@ -230,9 +230,9 @@ class JoiMusicSkill(MycroftSkill):
         or an expired alarm notification.
         """
         self.log.info("mycroft.stop")
+        self.stop_monitor()
         self.spotify.pause_playback(self.player_name)
         self.play_state.is_playing = False
-        self.stop_monitor()        
 
         self.cancel_scheduled_event("MonitorSpotify")
         self.cancel_scheduled_event("IdleCheck")
