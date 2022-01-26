@@ -28,6 +28,7 @@ class JoiMusicSkill(MycroftSkill):
         settings will be available."""
         my_setting = self.settings.get('my_setting')
         #self.add_event("mycroft.stop", self.stop)
+        self.add_event("recognizer_loop:record_begin", self.handle_listener_started)
 
 ###########################################
 
@@ -167,7 +168,7 @@ class JoiMusicSkill(MycroftSkill):
         self.schedule_repeating_event(
             self.poll_for_spotify_update, None, 1, name="MonitorSpotify"
         )
-        self.add_event("recognizer_loop:record_begin", self.handle_listener_started)
+        #self.add_event("recognizer_loop:record_begin", self.handle_listener_started)
 
     def stop_monitor(self):
         self.log.info("stop_monitor")
