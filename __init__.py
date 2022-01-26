@@ -1,6 +1,8 @@
 import random
 from adapt.intent import IntentBuilder
 from mycroft import MycroftSkill, intent_handler
+from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel
+from mycroft.messagebus import Message
 from .spotify import Spotify
 from .globals import *
 import webbrowser
@@ -175,7 +177,7 @@ class JoiMusicSkill(MycroftSkill):
         without needing to issue a Skill specific utterance such as media playback 
         or an expired alarm notification.
         """
-        pass
+        return self.shutdown()
 
     def shutdown(self):
         """ The shutdown method is called during the Skill process termination. 

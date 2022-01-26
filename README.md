@@ -12,18 +12,45 @@ All of these Mycroft kills Manager (mycroft-msm) commands are executed on the Ra
     ./mycroft-msm remove joi-skill-music
 
 ### Bash Script to automate updating of skills
-#!/bin/sh
-cd ~/mycroft-core/bin
-echo "----Uninstalling joi-skill-music----"
-./mycroft-msm remove joi-skill-music
-echo "----Installing joi-skill-music----"
-./mycroft-msm install https://github.com/TySeddon/joi-skill-music.git
+In home director create file called update-skills.sh
+    #!/bin/sh
+    cd ~/mycroft-core/bin
+    echo "----Uninstalling joi-skill-music----"
+    ./mycroft-msm remove joi-skill-music
+    echo "----Installing joi-skill-music----"
+    ./mycroft-msm install https://github.com/TySeddon/joi-skill-music.git
 
-### Install Python Package on Raspberry Pi
+Make script executable
+    chmod +x update-skills.sh
+
+## One-Time Raspberry Pi setup
     cd ~/mycroft-core        
     source venv-activate.sh  
-    pip install python-package-name
-    deactivate               
+    pip install munch
+    pip install spotipy==2.19.0
+
+
+### Chrome Configure
+
+#### Install “chrome widevine”
+This upgrades browser on Raspberry Pi so that it can play Spotify
+    sudo apt update
+    sudo apt install libwidevinecdm0    
+    sudo reboot
+
+#### Allow Sound to Auto Play
+Chromse does not allow videos to automatically play (autoplay).  This can be overridden in settings.
+1. Open chrome
+2. In URL type "chrome://settings/content/sound"
+3. Under "Customized behaviors", "Allowed to play sound", click "Add" button
+4. Enter the URLs that are allowed to auto play.
+    * localhost:8000
+    * 127.0.01:8000
+    * joi-test-site.azurewebsites.net
+
+#### Play Protectect Content
+1. In your browser address bar, enter chrome://settings/content
+2. Under Protected content, switch on Allow site to play protected content.
 
 
 ## Mycroft Terminology
