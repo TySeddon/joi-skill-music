@@ -7,6 +7,7 @@ import webbrowser
 from time import sleep
 from pprint import pprint
 import asyncio
+from globals import *
 
 # login to Spotify
 sp = Spotify()
@@ -23,7 +24,7 @@ session_tracks = random.sample(tracks,3)
 
 # launch music player
 player_name = "Joi-%s" % (uuid.uuid4())
-webbrowser.open("http://127.0.0.1:8000/joi/spotify?name=%s&token=%s" % (player_name, sp.access_token))
+webbrowser.open("%s/joi/spotify?name=%s&token=%s" % (JOI_SERVER_URL, player_name, sp.access_token))
 
 def get_next_track():
     if len(session_tracks) > 0:

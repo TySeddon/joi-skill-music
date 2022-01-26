@@ -5,3 +5,6 @@ SPOTIPY_REDIRECT_URI='http://127.0.0.1:8080'
 # define scopes required by Joi and web playback
 # https://github.com/spotify/web-playback-sdk/issues/11
 SPOTIPY_SCOPES = 'user-read-playback-state,user-modify-playback-state,streaming,user-read-email,user-read-private,playlist-read-private'
+
+#JOI_SERVER_URL = 'http://127.0.0.1:8000'
+JOI_SERVER_URL = 'https://joi-test-site.azurewebsites.net'
