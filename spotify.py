@@ -65,3 +65,12 @@ class Spotify():
             'remaining_ms' : state.item.duration_ms - state.progress_ms,
             'progress_pct' : state.progress_ms / state.item.duration_ms,
         })
+
+    def reduce_volume(self):
+        self.spotify_client.volume(50)
+        sleep(1)
+        self.spotify_client.volume(20)
+        sleep(1)
+
+    def max_volume(self):
+        self.spotify_client.volume(100)

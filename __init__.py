@@ -116,8 +116,10 @@ class JoiMusicSkill(MycroftSkill):
         track = self.get_next_track()
         while track:
             self.song_intro(track)
+            self.spotify.max_volume()
             self.spotify.start_playback(self.player_name, track.uri)
             asyncio.run(self.poll_for_done())
+            self.spotify.reduce_volume()
             self.spotify.pause_playback(self.player_name)
             self.song_followup(track)
             track = self.get_next_track()
