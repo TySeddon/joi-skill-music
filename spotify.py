@@ -67,10 +67,16 @@ class Spotify():
         })
 
     def reduce_volume(self):
-        self.spotify_client.volume(50)
-        sleep(1)
-        self.spotify_client.volume(20)
-        sleep(1)
-
+        try:
+            self.spotify_client.volume(50)
+            sleep(1)
+            self.spotify_client.volume(20)
+            sleep(1)
+        except Exception:
+            pass
+        
     def max_volume(self):
-        self.spotify_client.volume(100)
+        try:
+            self.spotify_client.volume(100)
+        except Exception:
+            pass
