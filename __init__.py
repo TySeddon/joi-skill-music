@@ -1,3 +1,5 @@
+from ast import Return
+from operator import truediv
 import random
 from adapt.intent import IntentBuilder
 from mycroft import MycroftSkill, intent_handler
@@ -74,6 +76,12 @@ class JoiMusicSkill(MycroftSkill):
         else:
             return None
 
+    def is_song_done(self):
+        if self.play_state.progress_pct > 0.05:
+            return True
+        else:
+            return False
+
     async def poll_for_done(self):
         while True:
             self.play_state = self.spotify.get_playback_state()
@@ -82,8 +90,17 @@ class JoiMusicSkill(MycroftSkill):
                 return "All Done"
             sleep(1)       
 
-    def _poll_for_spotify_update(self):
+    def poll_for_spotify_update(self):
         self.play_state = self.spotify.get_playback_state()
+        self.log.debug('%.2f %%' % (self.play_state.progress_pct * 100))
+        if self.is_song_done():
+            self.stop_monitor()
+
+            self.spotify.reduce_volume()
+            self.spotify.pause_playback(self.player_name)
+            self.song_followup(self.track)
+            self.start_next_song()
+
 
     # def start_next_song(self):
     #     # get song and artist name from first song in playlist
@@ -131,12 +148,12 @@ class JoiMusicSkill(MycroftSkill):
             track = self.get_next_track()
         self.session_end()
 
-    def start_playing(self):
-        track = self.get_next_track()
-        if track:
-            self.song_intro(track)
+    def start_next_song(self):
+        self.track = self.get_next_track()
+        if self.track:
+            self.song_intro(self.track)
             self.spotify.max_volume()
-            self.spotify.start_playback(self.player_name, track.uri)
+            self.spotify.start_playback(self.player_name, self.track.uri)
             self.start_monitor()
 
     @intent_handler(IntentBuilder('PlayMusicIntent').require('Music').optionally("Play"))
@@ -166,7 +183,7 @@ class JoiMusicSkill(MycroftSkill):
         self.player_name = "Joi-%s" % (uuid.uuid4())
         webbrowser.open("%s/joi/spotify?name=%s&token=%s" % (globals.JOI_SERVER_URL, self.player_name, self.spotify.access_token))
 
-        self.start_playing()
+        self.start_next_song()
 
     def start_monitor(self):
         # Clear any existing event
@@ -174,12 +191,11 @@ class JoiMusicSkill(MycroftSkill):
 
         # Schedule a new one every second to monitor/update display
         self.schedule_repeating_event(
-            self._poll_for_spotify_update, None, 1, name="MonitorSpotify"
+            self.poll_for_spotify_update, None, 1, name="MonitorSpotify"
         )
         self.add_event("recognizer_loop:record_begin", self.handle_listener_started)
 
     def stop_monitor(self):
-        # Clear any existing event
         self.cancel_scheduled_event("MonitorSpotify")
 
     def handle_pause(self, message=None):
