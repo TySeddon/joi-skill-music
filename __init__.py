@@ -49,7 +49,7 @@ class JoiMusicSkill(MycroftSkill):
 ###########################################
 
     def shuffle_tracks(self, tracks):
-         return random.sample(tracks,3)
+         return random.sample(tracks,5)
 
     # def get_playlist(self):
     #     """ Get the songs and associated artists in a play list """
