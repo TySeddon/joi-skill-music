@@ -98,12 +98,18 @@ class JoiMusicSkill(MycroftSkill):
 
     def song_intro(self, track):
         self.speak_dialog(key="Song_Intro",
-                          data={"artist_name": track.artists[0].name,"song_name": track.name},
+                          data={"artist_name": track.artists[0].name,
+                                "song_name": track.name,
+                                "resident_name": self.resident_name,
+                                },
                           wait=True)
 
     def song_followup(self, track):
         self.speak_dialog(key="Song_Followup",
-                          data={"artist_name": track.artists[0].name,"song_name": track.name},
+                          data={"artist_name": track.artists[0].name,
+                                "song_name": track.name,
+                                "resident_name": self.resident_name,
+                                },
                           wait=True)
 
     def play_songs(self):
@@ -121,8 +127,11 @@ class JoiMusicSkill(MycroftSkill):
     def handle_play_music_intent(self, message):
         """ This is an Adapt intent handler, it is triggered by a keyword."""
 
+        self.resident_name = "Ruth"
+
         # start the session
-        self.speak_dialog("Session_Start")
+        self.speak_dialog(key="Session_Start", 
+                          data={"resident_name": self.resident_name})
 
         # login to Spotify
         self.spotify = Spotify()
