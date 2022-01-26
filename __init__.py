@@ -91,10 +91,13 @@ class JoiMusicSkill(MycroftSkill):
 
     def poll_for_spotify_update(self):
         self.play_state = self.spotify.get_playback_state()
-        self.log.info('%.2f %%' % (self.play_state.progress_pct * 100))
+        self.log.info('%.2f %% - Playing = %s' % (self.play_state.progress_pct * 100, self.play_state.is_playing))
 
         if not self.play_state.is_playing:
-            self.stop_monitor()
+            # if no longer playing, abandon polling after 60 seconds
+            self.not_playing_count += 1
+            if self.not_playing_count > 60:
+                self.stop_monitor()
 
         if self.is_song_done():
             self.stop_monitor()
@@ -106,20 +109,6 @@ class JoiMusicSkill(MycroftSkill):
             started = self.start_next_song()
             if not started:
                 self.session_end()
-
-    # def start_next_song(self):
-    #     # get song and artist name from first song in playlist
-    #     track = self.get_next_track()
-    #     if track is not None:
-    #         # introduce the next song
-    #         self.speak_dialog("Song_Intro",
-    #                         {"artist_name": track.artists[0].name,
-    #                         "song_name": track.name})
-    #         # play the song
-    #         self.spotify.start_playback(self.player_name, track.uri)
-    #         return True
-    #     else:
-    #         return False
 
     def session_end(self):
         self.speak_dialog(key="Session_End")
@@ -140,18 +129,18 @@ class JoiMusicSkill(MycroftSkill):
                                 },
                           wait=True)
 
-    def play_songs(self):
-        track = self.get_next_track()
-        while track:
-            self.song_intro(track)
-            self.spotify.max_volume()
-            self.spotify.start_playback(self.player_name, track.uri)
-            asyncio.run(self.poll_for_done())
-            self.spotify.reduce_volume()
-            self.spotify.pause_playback(self.player_name)
-            self.song_followup(track)
-            track = self.get_next_track()
-        self.session_end()
+    # def play_songs(self):
+    #     track = self.get_next_track()
+    #     while track:
+    #         self.song_intro(track)
+    #         self.spotify.max_volume()
+    #         self.spotify.start_playback(self.player_name, track.uri)
+    #         asyncio.run(self.poll_for_done())
+    #         self.spotify.reduce_volume()
+    #         self.spotify.pause_playback(self.player_name)
+    #         self.song_followup(track)
+    #         track = self.get_next_track()
+    #     self.session_end()
 
     @intent_handler(IntentBuilder('PlayMusicIntent').require('Music').optionally("Play"))
     def handle_play_music_intent(self, message):
@@ -193,6 +182,7 @@ class JoiMusicSkill(MycroftSkill):
         self.add_event("recognizer_loop:record_begin", self.handle_listener_started)
 
     def stop_monitor(self):
+        self.not_playing_count = 0
         self.cancel_scheduled_event("MonitorSpotify")
 
     def handle_pause(self, message=None):
