@@ -1,7 +1,6 @@
 import random
 from adapt.intent import IntentBuilder
 from mycroft import MycroftSkill, intent_handler
-from scripts.spotify_playlists import shuffle_tracks
 from spotify import Spotify
 from globals import *
 import webbrowser
@@ -49,8 +48,8 @@ class JoiMusicSkill(MycroftSkill):
 
 ###########################################
 
-    # def shuffle_tracks(tracks):
-    #     return random.sample(tracks,3)
+    def shuffle_tracks(self, tracks):
+         return random.sample(tracks,3)
 
     # def get_playlist(self):
     #     """ Get the songs and associated artists in a play list """
@@ -135,7 +134,7 @@ class JoiMusicSkill(MycroftSkill):
         tracks = self.spotify.get_playlist_tracks(playlist.id)
 
         # create a random set of tracks for this session
-        self.session_tracks = shuffle_tracks(tracks)
+        self.session_tracks = self.shuffle_tracks(tracks)
 
         # launch music player
         self.player_name = "Joi-%s" % (uuid.uuid4())
