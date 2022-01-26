@@ -57,24 +57,23 @@ class JoiMusicSkill(MycroftSkill):
     def shuffle_tracks(self, tracks):
          return random.sample(tracks,5)
 
-    # def get_playlist(self):
-    #     """ Get the songs and associated artists in a play list """
-    #     # todo: hardcode
-    #     return [("Bobby Darin","You're the Reason I'm Living"),
-    #             ("Elvis Presley", "Slowly But Surely"),
-    #             ("Lesley Gore","It's My Party")]
-
-    # def choose_song(self,playlist):
-    #     """ Choose a song from the playlist """
-    #     # todo: hardcode
-    #     return random.choice(playlist)    
-
     def get_next_track(self):
         if len(self.session_tracks) > 0:
             track = self.session_tracks.pop(0)
             return track
         else:
             return None
+
+    def start_next_song(self):
+        self.track = self.get_next_track()
+        if self.track:
+            self.song_intro(self.track)
+            self.spotify.max_volume()
+            self.spotify.start_playback(self.player_name, self.track.uri)
+            self.start_monitor()
+            return True
+        else:
+            return False
 
     def is_song_done(self):
         if self.play_state.progress_pct > 0.05:
@@ -92,15 +91,18 @@ class JoiMusicSkill(MycroftSkill):
 
     def poll_for_spotify_update(self):
         self.play_state = self.spotify.get_playback_state()
-        self.log.debug('%.2f %%' % (self.play_state.progress_pct * 100))
+        self.log.info('%.2f %%' % (self.play_state.progress_pct * 100))
+
         if self.is_song_done():
             self.stop_monitor()
 
             self.spotify.reduce_volume()
             self.spotify.pause_playback(self.player_name)
             self.song_followup(self.track)
-            self.start_next_song()
 
+            started = self.start_next_song()
+            if not started:
+                self.session_end()
 
     # def start_next_song(self):
     #     # get song and artist name from first song in playlist
@@ -147,14 +149,6 @@ class JoiMusicSkill(MycroftSkill):
             self.song_followup(track)
             track = self.get_next_track()
         self.session_end()
-
-    def start_next_song(self):
-        self.track = self.get_next_track()
-        if self.track:
-            self.song_intro(self.track)
-            self.spotify.max_volume()
-            self.spotify.start_playback(self.player_name, self.track.uri)
-            self.start_monitor()
 
     @intent_handler(IntentBuilder('PlayMusicIntent').require('Music').optionally("Play"))
     def handle_play_music_intent(self, message):
