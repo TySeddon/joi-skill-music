@@ -27,7 +27,7 @@ class JoiMusicSkill(MycroftSkill):
         registered with the system. Intents will be registered and Skill
         settings will be available."""
         my_setting = self.settings.get('my_setting')
-        self.add_event("mycroft.stop", self.stop)
+        #self.add_event("mycroft.stop", self.stop)
 
 ###########################################
 
