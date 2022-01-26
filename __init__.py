@@ -2,7 +2,7 @@ import random
 from adapt.intent import IntentBuilder
 from mycroft import MycroftSkill, intent_handler
 from .spotify import Spotify
-import globals
+from .globals import *
 import webbrowser
 from time import sleep
 import uuid
