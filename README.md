@@ -19,6 +19,11 @@ echo "----Uninstalling joi-skill-music----"
 echo "----Installing joi-skill-music----"
 ./mycroft-msm install https://github.com/TySeddon/joi-skill-music.git
 
+### Install Python Package on Raspberry Pi
+    cd ~/mycroft-core        
+    source venv-activate.sh  
+    pip install python-package-name
+    deactivate               
 
 
 ## Mycroft Terminology
@@ -41,6 +46,8 @@ echo "----Installing joi-skill-music----"
 # Required Packages
     pip install msk
     pip install adapt-parser
+    pip install munch
+    pip install spotipy
 
 
 ## Update requirements.txt

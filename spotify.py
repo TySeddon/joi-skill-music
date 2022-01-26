@@ -12,7 +12,6 @@ class Spotify():
             client_id=SPOTIPY_CLIENT_ID, 
             client_secret=SPOTIPY_CLIENT_SECRET,
             redirect_uri=SPOTIPY_REDIRECT_URI,
-            show_dialog=True,
             scope=SPOTIPY_SCOPES)
 
         # create SpotifyClient
