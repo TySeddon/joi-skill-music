@@ -1,7 +1,7 @@
 import random
 from adapt.intent import IntentBuilder
 from mycroft import MycroftSkill, intent_handler
-import spotify
+from .spotify import Spotify
 import globals
 import webbrowser
 from time import sleep
@@ -125,7 +125,7 @@ class JoiMusicSkill(MycroftSkill):
         self.speak_dialog("Session_Start")
 
         # login to Spotify
-        self.spotify = spotify.Spotify()
+        self.spotify = Spotify()
 
         # get list of playlists
         playlists = self.spotify.get_playlists()
