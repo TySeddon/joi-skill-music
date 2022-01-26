@@ -20,6 +20,7 @@ class JoiMusicSkill(MycroftSkill):
         """
         super().__init__()
         self.learning = True
+        self.stopped = False
 
     def initialize(self):
         """ Perform any final setup needed for the skill here.
@@ -29,104 +30,6 @@ class JoiMusicSkill(MycroftSkill):
         my_setting = self.settings.get('my_setting')
         #self.add_event("mycroft.stop", self.stop)
         self.add_event("recognizer_loop:record_begin", self.handle_listener_started)
-
-###########################################
-
-    @intent_handler(IntentBuilder('ThankYouIntent').require('ThankYouKeyword'))
-    def handle_thank_you_intent(self, message):
-        """ This is an Adapt intent handler, it is triggered by a keyword."""
-        self.speak_dialog("welcome")
-
-    @intent_handler('HowAreYou.intent')
-    def handle_how_are_you_intent(self, message):
-        """ This is a Padatious intent handler.
-        It is triggered using a list of sample phrases."""
-        self.speak_dialog("how.are.you")
-
-    @intent_handler(IntentBuilder('HelloWorldIntent')
-                    .require('HelloWorldKeyword'))
-    def handle_hello_world_intent(self, message):
-        """ Skills can log useful information. These will appear in the CLI and
-        the skills.log file."""
-        self.log.info("There are five types of log messages: "
-                      "info, debug, warning, error, and exception.")
-        self.speak_dialog("hello.world")
-
-###########################################
-
-    def shuffle_tracks(self, tracks):
-         return random.sample(tracks,5)
-
-    def get_next_track(self):
-        if len(self.session_tracks) > 0:
-            track = self.session_tracks.pop(0)
-            return track
-        else:
-            return None
-
-    def start_next_song(self, pauseFirst):
-        self.track = self.get_next_track()
-        if self.track:
-            if pauseFirst:
-                sleep(5)
-            self.log.info("Starting song %s" % (self.track.name))
-            self.song_intro(self.track)
-            self.spotify.max_volume()
-            self.spotify.start_playback(self.player_name, self.track.uri)
-            self.start_monitor()
-            return True
-        else:
-            self.log.info("No more songs in queue")
-            return False
-
-    def is_song_done(self):
-        if self.play_state.progress_pct > 0.05:
-            return True
-        else:
-            return False
-
-    def poll_for_spotify_update(self):
-        self.play_state = self.spotify.get_playback_state()
-        self.log.info('%.2f %% - Playing = %s - %s' % (self.play_state.progress_pct * 100, self.play_state.is_playing, self.track.name))
-
-        if not self.play_state.is_playing:
-            # if no longer playing, abandon polling after 60 seconds
-            self.not_playing_count += 1
-            if self.not_playing_count > 60:
-                self.stop_monitor()
-
-        if self.is_song_done():
-            self.stop_monitor()
-
-            self.spotify.reduce_volume()
-            self.spotify.pause_playback(self.player_name)
-            self.song_followup(self.track)
-
-            started = self.start_next_song(True)
-            if not started:
-                self.session_end()
-
-    def session_end(self):
-        self.log.info("session_end")
-        self.speak_dialog(key="Session_End")
-
-    def song_intro(self, track):
-        self.log.info("song_intro")
-        self.speak_dialog(key="Song_Intro",
-                          data={"artist_name": track.artists[0].name,
-                                "song_name": track.name,
-                                "resident_name": self.resident_name,
-                                },
-                          wait=True)
-
-    def song_followup(self, track):
-        self.log.info("song_followup")
-        self.speak_dialog(key="Song_Followup",
-                          data={"artist_name": track.artists[0].name,
-                                "song_name": track.name,
-                                "resident_name": self.resident_name,
-                                },
-                          wait=True)
 
     @intent_handler(IntentBuilder('PlayMusicIntent').require('Music').optionally("Play"))
     def handle_play_music_intent(self, message):
@@ -158,15 +61,83 @@ class JoiMusicSkill(MycroftSkill):
 
         self.start_next_song(False)
 
+
+
+    def session_end(self):
+        self.log.info("session_end")
+        self.speak_dialog(key="Session_End")
+
+    def song_intro(self, track):
+        self.log.info("song_intro")
+        self.speak_dialog(key="Song_Intro",
+                          data={"artist_name": track.artists[0].name,
+                                "song_name": track.name,
+                                "resident_name": self.resident_name,
+                                },
+                          wait=True)
+
+    def song_followup(self, track):
+        self.log.info("song_followup")
+        self.speak_dialog(key="Song_Followup",
+                          data={"artist_name": track.artists[0].name,
+                                "song_name": track.name,
+                                "resident_name": self.resident_name,
+                                },
+                          wait=True)
+
+    def shuffle_tracks(self, tracks):
+         return random.sample(tracks,5)
+
+    def get_next_track(self):
+        if len(self.session_tracks) > 0:
+            track = self.session_tracks.pop(0)
+            return track
+        else:
+            return None
+
+    def start_next_song(self, pauseFirst):
+        self.track = self.get_next_track()
+        if self.track:
+            if pauseFirst:
+                sleep(5)
+            if self.stopped: return False
+            self.log.info("Starting song %s" % (self.track.name))
+            self.song_intro(self.track)
+            self.spotify.max_volume()
+            self.spotify.start_playback(self.player_name, self.track.uri)
+            self.start_monitor()
+            return True
+        else:
+            self.log.info("No more songs in queue")
+            return False
+
+    def is_song_done(self):
+        if self.play_state.progress_pct > 0.05:
+            return True
+        else:
+            return False
+
+    def pause_song(self, message=None):
+        self.log.info("pause_song")
+        self.spotify.pause_playback(self.player_name)
+        self.play_state.is_playing = False
+        self.stop_monitor()        
+
+    def resume_song(self):
+        self.log.info("resume_song")
+        self.spotify.resume_playback(self.player_name)
+        self.play_state.is_playing = True
+        self.start_monitor()
+
     def start_monitor(self):
         # Clear any existing event
         self.stop_monitor()
+        if self.stopped: return
 
         self.log.info("start_monitor")
-
-        # Schedule a new one every second to monitor/update display
+        # Schedule a new one every second to monitor Spotify play status
         self.schedule_repeating_event(
-            self.poll_for_spotify_update, None, 1, name="MonitorSpotify"
+            self.monitor_play_state, None, 1, name="MonitorSpotify"
         )
         #self.add_event("recognizer_loop:record_begin", self.handle_listener_started)
 
@@ -175,41 +146,55 @@ class JoiMusicSkill(MycroftSkill):
         self.cancel_scheduled_event("MonitorSpotify")
         self.not_playing_count = 0
 
-    def handle_pause(self, message=None):
-        self.log.info("handle_pause")
-        self.spotify.pause_playback(self.player_name)
-        self.play_state.is_playing = False
-        self.stop_monitor()        
+    def monitor_play_state(self):
+        self.play_state = self.spotify.get_playback_state()
+        self.log.info('%.2f %% - Playing = %s - %s' % (self.play_state.progress_pct * 100, self.play_state.is_playing, self.track.name))
 
-    def handle_resume(self):
-        self.log.info("handle_resume")
-        self.spotify.resume_playback(self.player_name)
-        self.play_state.is_playing = True
-        self.start_monitor()
+        if not self.play_state.is_playing:
+            # if no longer playing, abandon polling after 60 seconds
+            self.not_playing_count += 1
+            if self.not_playing_count > 60:
+                self.stop_monitor()
+
+        if self.is_song_done():
+            # song is done, so follow-up with user and start next song
+            self.stop_monitor()
+
+            self.spotify.reduce_volume()
+            self.spotify.pause_playback(self.player_name)
+            self.song_followup(self.track)
+
+            started = self.start_next_song(True)
+            if not started:
+                self.session_end()        
 
     def handle_listener_started(self, message):
         self.log.info("handle_listener_started")
-
         if self.play_state.is_playing:
-            self.handle_pause()
+            self.pause_song()
+            self.start_idle_check()
 
-            # Start idle check
-            self.idle_count = 0
-            self.cancel_scheduled_event("IdleCheck")
-            self.schedule_repeating_event(
-                self.check_for_idle, None, 1, name="IdleCheck"
-            )       
+    def start_idle_check(self):
+        self.idle_count = 0
+        self.stop_idle_check()
+        self.schedule_repeating_event(
+            self.check_for_idle, None, 1, name="IdleCheck"
+        )       
+
+    def stop_idle_check(self):
+        self.cancel_scheduled_event("IdleCheck")
 
     def check_for_idle(self):
         self.log.info("check_for_idle")
         if self.play_state.is_playing:
-            self.cancel_scheduled_event("IdleCheck")
+            self.stop_idle_check()
             return
         self.idle_count += 1
         if self.idle_count >= 5:
             # Resume playback after 5 seconds of being idle
-            self.cancel_scheduled_event("IdleCheck")
-            self.handle_resume()
+            self.stop_idle_check()
+            if self.stopped: return
+            self.resume_song()
 
 ###########################################
 
@@ -231,11 +216,10 @@ class JoiMusicSkill(MycroftSkill):
         or an expired alarm notification.
         """
         self.log.info("mycroft.stop")
-
-        self.cancel_scheduled_event("MonitorSpotify")
-        self.cancel_scheduled_event("IdleCheck")
+        self.stopped = True
 
         self.stop_monitor()
+        self.stop_idle_check()
         self.spotify.pause_playback(self.player_name)
         self.play_state.is_playing = False
 
@@ -249,8 +233,8 @@ class JoiMusicSkill(MycroftSkill):
         or that have initiated new processes.
         """
         self.log.info("shutdown")
-        self.cancel_scheduled_event("MonitorSpotify")
-        self.cancel_scheduled_event("IdleCheck")
+        self.stop_monitor()
+        self.stop_idle_check()
 
 
 def create_skill():
