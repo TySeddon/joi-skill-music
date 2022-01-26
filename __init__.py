@@ -230,12 +230,14 @@ class JoiMusicSkill(MycroftSkill):
         or an expired alarm notification.
         """
         self.log.info("mycroft.stop")
+
+        self.cancel_scheduled_event("MonitorSpotify")
+        self.cancel_scheduled_event("IdleCheck")
+
         self.stop_monitor()
         self.spotify.pause_playback(self.player_name)
         self.play_state.is_playing = False
 
-        self.cancel_scheduled_event("MonitorSpotify")
-        self.cancel_scheduled_event("IdleCheck")
         return True
 
     def shutdown(self):
