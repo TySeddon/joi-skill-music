@@ -35,6 +35,7 @@ class JoiMusicSkill(MycroftSkill):
     def handle_play_music_intent(self, message):
         """ This is an Adapt intent handler, it is triggered by a keyword."""
         self.log.info("handle_play_music_intent")
+        self.stopped = False
 
         self.resident_name = "Ruth"
 
