@@ -171,8 +171,8 @@ class JoiMusicSkill(MycroftSkill):
 
     def stop_monitor(self):
         self.log.info("stop_monitor")
-        self.not_playing_count = 0
         self.cancel_scheduled_event("MonitorSpotify")
+        self.not_playing_count = 0
 
     def handle_pause(self, message=None):
         self.log.info("handle_pause")
@@ -233,7 +233,10 @@ class JoiMusicSkill(MycroftSkill):
         self.spotify.pause_playback(self.player_name)
         self.play_state.is_playing = False
         self.stop_monitor()        
-        return self.shutdown()
+
+        self.cancel_scheduled_event("MonitorSpotify")
+        self.cancel_scheduled_event("IdleCheck")
+        return True
 
     def shutdown(self):
         """ The shutdown method is called during the Skill process termination. 
@@ -243,7 +246,8 @@ class JoiMusicSkill(MycroftSkill):
         or that have initiated new processes.
         """
         self.log.info("shutdown")
-        self.stop_monitor()
+        self.cancel_scheduled_event("MonitorSpotify")
+        self.cancel_scheduled_event("IdleCheck")
 
 
 def create_skill():
