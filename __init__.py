@@ -252,9 +252,7 @@ class JoiMusicSkill(MycroftSkill):
         that have scheduled future events, may be writing to a file or database, 
         or that have initiated new processes.
         """
-        #self.cancel_scheduled_event('my_event')
-        #self.stop_my_subprocess()    
-        pass
+        self.stop_monitor()
 
 
 def create_skill():
