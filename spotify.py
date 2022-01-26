@@ -62,13 +62,22 @@ class Spotify():
     def get_playback_state(self):
         result = self.spotify_client.current_playback()
         state = munchify(result)
-        return munchify({
-            'is_playing' : state.is_playing,
-            'progress_ms' : state.progress_ms,
-            'duration_ms' : state.item.duration_ms,
-            'remaining_ms' : state.item.duration_ms - state.progress_ms,
-            'progress_pct' : state.progress_ms / state.item.duration_ms,
-        })
+        if state:
+            return munchify({
+                'is_playing' : state.is_playing,
+                'progress_ms' : state.progress_ms,
+                'duration_ms' : state.item.duration_ms,
+                'remaining_ms' : state.item.duration_ms - state.progress_ms,
+                'progress_pct' : state.progress_ms / state.item.duration_ms,
+            })
+        else:
+            return munchify({
+                'is_playing' : False,
+                'progress_ms' : 0,
+                'duration_ms' : 0,
+                'remaining_ms' : 0,
+                'progress_pct' : 0,
+            })
 
     def reduce_volume(self):
         try:
