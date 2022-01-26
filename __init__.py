@@ -229,7 +229,10 @@ class JoiMusicSkill(MycroftSkill):
         without needing to issue a Skill specific utterance such as media playback 
         or an expired alarm notification.
         """
+        self.log.info("mycroft.stop")
         self.spotify.pause_playback(self.player_name)
+        self.play_state.is_playing = False
+        self.stop_monitor()        
         return self.shutdown()
 
     def shutdown(self):
@@ -239,6 +242,7 @@ class JoiMusicSkill(MycroftSkill):
         that have scheduled future events, may be writing to a file or database, 
         or that have initiated new processes.
         """
+        self.log.info("shutdown")
         self.stop_monitor()
 
 
