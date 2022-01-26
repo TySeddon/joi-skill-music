@@ -44,10 +44,8 @@ echo "----Installing joi-skill-music----"
 
 
 ## Update requirements.txt
-
     pip freeze > requirements.txt
 
 ## Load Required Packages
 Create your virtual environment, then load all the required dependencies with:
-
     pip install -r requirements.txt
