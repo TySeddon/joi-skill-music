@@ -61,14 +61,14 @@ class JoiMusicSkill(MycroftSkill):
 
         self.start_next_song(False)
 
-
-
     def session_end(self):
         self.log.info("session_end")
+        if self.stopped: return 
         self.speak_dialog(key="Session_End")
 
     def song_intro(self, track):
         self.log.info("song_intro")
+        if self.stopped: return 
         self.speak_dialog(key="Song_Intro",
                           data={"artist_name": track.artists[0].name,
                                 "song_name": track.name,
@@ -78,6 +78,7 @@ class JoiMusicSkill(MycroftSkill):
 
     def song_followup(self, track):
         self.log.info("song_followup")
+        if self.stopped: return 
         self.speak_dialog(key="Song_Followup",
                           data={"artist_name": track.artists[0].name,
                                 "song_name": track.name,
@@ -98,6 +99,7 @@ class JoiMusicSkill(MycroftSkill):
     def start_next_song(self, pauseFirst):
         self.track = self.get_next_track()
         if self.track:
+            if self.stopped: return False
             if pauseFirst:
                 sleep(5)
             if self.stopped: return False
