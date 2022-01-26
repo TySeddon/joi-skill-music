@@ -94,17 +94,17 @@ class JoiMusicSkill(MycroftSkill):
     #         return False
 
     def session_end(self):
-        self.speak_dialog("Session_End")
+        self.speak_dialog(key="Session_End")
 
     def song_intro(self, track):
-        self.speak_dialog("Song_Intro",
-                        {"artist_name": track.artists[0].name,
-                        "song_name": track.name})
+        self.speak_dialog(key="Song_Intro",
+                          data={"artist_name": track.artists[0].name,"song_name": track.name},
+                          wait=True)
 
     def song_followup(self, track):
-        self.speak_dialog("Song_Followup",
-                        {"artist_name": track.artists[0].name,
-                        "song_name": track.name})
+        self.speak_dialog(key="Song_Followup",
+                          data={"artist_name": track.artists[0].name,"song_name": track.name},
+                          wait=True)
 
     def play_songs(self):
         track = self.get_next_track()
