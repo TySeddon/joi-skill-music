@@ -10,7 +10,7 @@ from time import sleep
 import uuid
 import asyncio
 
-class JoiMusicSkill(MycroftSkill):
+class JoiMusicSkill(CommonPlaySkill):
     def __init__(self):
         """ The __init__ method is called when the Skill is first constructed.
         It is often used to declare variables or perform setup actions, however
