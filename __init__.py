@@ -93,6 +93,9 @@ class JoiMusicSkill(MycroftSkill):
         self.play_state = self.spotify.get_playback_state()
         self.log.info('%.2f %%' % (self.play_state.progress_pct * 100))
 
+        if not self.play_state.is_playing:
+            self.stop_monitor()
+
         if self.is_song_done():
             self.stop_monitor()
 
