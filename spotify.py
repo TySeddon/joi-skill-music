@@ -1,7 +1,7 @@
 from time import sleep
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-import globals
+from .globals import *
 from munch import munchify
 
 class Spotify():
