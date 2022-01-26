@@ -147,16 +147,16 @@ class JoiMusicSkill(MycroftSkill):
 
 ###########################################
 
-    def converse(self, utterances, lang):
-        """ The converse method can be used to handle follow up utterances 
-        prior to the normal intent handling process. It can be useful for handling 
-        utterances from a User that do not make sense as a standalone intent.
-        """
-        if utterances and self.voc_match(utterances[0], 'understood'):
-            self.speak_dialog('great')
-            return True
-        else:
-            return False        
+    # def converse(self, utterances, lang):
+    #     """ The converse method can be used to handle follow up utterances 
+    #     prior to the normal intent handling process. It can be useful for handling 
+    #     utterances from a User that do not make sense as a standalone intent.
+    #     """
+    #     if utterances and self.voc_match(utterances[0], 'understood'):
+    #         self.speak_dialog('great')
+    #         return True
+    #     else:
+    #         return False        
 
     def stop(self):
         """ The stop method is called anytime a User says "Stop" or a similar command. 
