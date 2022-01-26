@@ -63,9 +63,11 @@ class JoiMusicSkill(MycroftSkill):
         else:
             return None
 
-    def start_next_song(self):
+    def start_next_song(self, pauseFirst):
         self.track = self.get_next_track()
         if self.track:
+            if pauseFirst:
+                sleep(5)
             self.log.info("Starting song %s" % (self.track.name))
             self.song_intro(self.track)
             self.spotify.max_volume()
@@ -81,14 +83,6 @@ class JoiMusicSkill(MycroftSkill):
             return True
         else:
             return False
-
-    # async def poll_for_done(self):
-    #     while True:
-    #         self.play_state = self.spotify.get_playback_state()
-    #         print('%.2f %%' % (self.play_state.progress_pct * 100))
-    #         if self.play_state.progress_pct > 0.05:
-    #             return "All Done"
-    #         sleep(1)       
 
     def poll_for_spotify_update(self):
         self.play_state = self.spotify.get_playback_state()
@@ -107,8 +101,7 @@ class JoiMusicSkill(MycroftSkill):
             self.spotify.pause_playback(self.player_name)
             self.song_followup(self.track)
 
-            sleep(5)
-            started = self.start_next_song()
+            started = self.start_next_song(True)
             if not started:
                 self.session_end()
 
@@ -133,19 +126,6 @@ class JoiMusicSkill(MycroftSkill):
                                 "resident_name": self.resident_name,
                                 },
                           wait=True)
-
-    # def play_songs(self):
-    #     track = self.get_next_track()
-    #     while track:
-    #         self.song_intro(track)
-    #         self.spotify.max_volume()
-    #         self.spotify.start_playback(self.player_name, track.uri)
-    #         asyncio.run(self.poll_for_done())
-    #         self.spotify.reduce_volume()
-    #         self.spotify.pause_playback(self.player_name)
-    #         self.song_followup(track)
-    #         track = self.get_next_track()
-    #     self.session_end()
 
     @intent_handler(IntentBuilder('PlayMusicIntent').require('Music').optionally("Play"))
     def handle_play_music_intent(self, message):
@@ -175,13 +155,13 @@ class JoiMusicSkill(MycroftSkill):
         self.player_name = "Joi-%s" % (uuid.uuid4())
         webbrowser.open("%s/joi/spotify?name=%s&token=%s" % (globals.JOI_SERVER_URL, self.player_name, self.spotify.access_token))
 
-        self.start_next_song()
+        self.start_next_song(False)
 
     def start_monitor(self):
-        self.log.info("start_monitor")
-
         # Clear any existing event
         self.stop_monitor()
+
+        self.log.info("start_monitor")
 
         # Schedule a new one every second to monitor/update display
         self.schedule_repeating_event(
