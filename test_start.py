@@ -72,6 +72,7 @@ while track:
     song_intro()
     sp.start_playback(player_name, track.uri)
     asyncio.run(poll_for_done())
+    sp.pause_playback(player_name)
     song_followup()
     track = get_next_track()
 

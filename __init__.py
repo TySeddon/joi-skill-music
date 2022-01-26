@@ -1,8 +1,8 @@
 import random
 from adapt.intent import IntentBuilder
 from mycroft import MycroftSkill, intent_handler
-from .spotify import Spotify
-from .globals import *
+import spotify
+import globals
 import webbrowser
 from time import sleep
 import uuid
@@ -74,7 +74,7 @@ class JoiMusicSkill(MycroftSkill):
         while True:
             play_state = self.spotify.get_playback_state()
             print('%.2f %%' % (play_state.progress_pct * 100))
-            if play_state.progress_pct > 0.02:
+            if play_state.progress_pct > 0.05:
                 return "All Done"
             last_progress = play_state.progress_pct
             sleep(1)            
@@ -112,6 +112,7 @@ class JoiMusicSkill(MycroftSkill):
             self.song_intro(track)
             self.spotify.start_playback(self.player_name, track.uri)
             asyncio.run(self.poll_for_done())
+            self.spotify.pause_playback(self.player_name)
             self.song_followup(track)
             track = self.get_next_track()
         self.session_end()
@@ -124,7 +125,7 @@ class JoiMusicSkill(MycroftSkill):
         self.speak_dialog("Session_Start")
 
         # login to Spotify
-        self.spotify = Spotify()
+        self.spotify = spotify.Spotify()
 
         # get list of playlists
         playlists = self.spotify.get_playlists()
@@ -138,7 +139,7 @@ class JoiMusicSkill(MycroftSkill):
 
         # launch music player
         self.player_name = "Joi-%s" % (uuid.uuid4())
-        webbrowser.open("%s/joi/spotify?name=%s&token=%s" % (JOI_SERVER_URL, self.player_name, self.spotify.access_token))
+        webbrowser.open("%s/joi/spotify?name=%s&token=%s" % (globals.JOI_SERVER_URL, self.player_name, self.spotify.access_token))
 
         self.play_songs()
 

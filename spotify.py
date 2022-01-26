@@ -1,7 +1,7 @@
 from time import sleep
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from .globals import *
+import globals
 from munch import munchify
 
 class Spotify():
@@ -9,10 +9,10 @@ class Spotify():
     def __init__(self):
         # setup credentials
         self.client_credentials_manager=SpotifyOAuth(
-            client_id=SPOTIPY_CLIENT_ID, 
-            client_secret=SPOTIPY_CLIENT_SECRET,
-            redirect_uri=SPOTIPY_REDIRECT_URI,
-            scope=SPOTIPY_SCOPES)
+            client_id=globals.SPOTIPY_CLIENT_ID, 
+            client_secret=globals.SPOTIPY_CLIENT_SECRET,
+            redirect_uri=globals.SPOTIPY_REDIRECT_URI,
+            scope=globals.SPOTIPY_SCOPES)
 
         # create SpotifyClient
         self.spotify_client = spotipy.Spotify(client_credentials_manager=self.client_credentials_manager)
@@ -50,6 +50,10 @@ class Spotify():
         device = self.get_device_by_name(player_name)
         self.spotify_client.start_playback(device_id=device.id, 
                   uris=[track_uri])
+
+    def pause_playback(self, player_name):
+        device = self.get_device_by_name(player_name)
+        self.spotify_client.pause_playback(device_id=device.id)
 
     def get_playback_state(self):
         result = self.spotify_client.current_playback()
