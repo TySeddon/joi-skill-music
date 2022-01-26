@@ -205,8 +205,8 @@ class JoiMusicSkill(MycroftSkill):
             self.cancel_scheduled_event("IdleCheck")
             return
         self.idle_count += 1
-        if self.idle_count >= 3:
-            # Resume playback after 3 seconds of being idle
+        if self.idle_count >= 5:
+            # Resume playback after 5 seconds of being idle
             self.cancel_scheduled_event("IdleCheck")
             self.handle_resume()
 
