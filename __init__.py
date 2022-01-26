@@ -9,8 +9,9 @@ import webbrowser
 from time import sleep
 import uuid
 import asyncio
+import urllib.parse
 
-class JoiMusicSkill(CommonPlaySkill):
+class JoiMusicSkill(MycroftSkill):
     def __init__(self):
         """ The __init__ method is called when the Skill is first constructed.
         It is often used to declare variables or perform setup actions, however
@@ -25,6 +26,7 @@ class JoiMusicSkill(CommonPlaySkill):
         registered with the system. Intents will be registered and Skill
         settings will be available."""
         my_setting = self.settings.get('my_setting')
+        self.add_event("mycroft.stop", self.stop)
 
 ###########################################
 
@@ -74,12 +76,14 @@ class JoiMusicSkill(CommonPlaySkill):
 
     async def poll_for_done(self):
         while True:
-            play_state = self.spotify.get_playback_state()
-            print('%.2f %%' % (play_state.progress_pct * 100))
-            if play_state.progress_pct > 0.05:
+            self.play_state = self.spotify.get_playback_state()
+            print('%.2f %%' % (self.play_state.progress_pct * 100))
+            if self.play_state.progress_pct > 0.05:
                 return "All Done"
-            last_progress = play_state.progress_pct
-            sleep(1)            
+            sleep(1)       
+
+    def _poll_for_spotify_update(self):
+        self.play_state = self.spotify.get_playback_state()
 
     # def start_next_song(self):
     #     # get song and artist name from first song in playlist
@@ -127,6 +131,14 @@ class JoiMusicSkill(CommonPlaySkill):
             track = self.get_next_track()
         self.session_end()
 
+    def start_playing(self):
+        track = self.get_next_track()
+        if track:
+            self.song_intro(track)
+            self.spotify.max_volume()
+            self.spotify.start_playback(self.player_name, track.uri)
+            self.start_monitor()
+
     @intent_handler(IntentBuilder('PlayMusicIntent').require('Music').optionally("Play"))
     def handle_play_music_intent(self, message):
         """ This is an Adapt intent handler, it is triggered by a keyword."""
@@ -154,9 +166,59 @@ class JoiMusicSkill(CommonPlaySkill):
         self.player_name = "Joi-%s" % (uuid.uuid4())
         webbrowser.open("%s/joi/spotify?name=%s&token=%s" % (globals.JOI_SERVER_URL, self.player_name, self.spotify.access_token))
 
-        self.play_songs()
+        self.start_playing()
 
+    def start_monitor(self):
+        # Clear any existing event
+        self.stop_monitor()
 
+        # Schedule a new one every second to monitor/update display
+        self.schedule_repeating_event(
+            self._poll_for_spotify_update, None, 1, name="MonitorSpotify"
+        )
+        self.add_event("recognizer_loop:record_begin", self.handle_listener_started)
+
+    def stop_monitor(self):
+        # Clear any existing event
+        self.cancel_scheduled_event("MonitorSpotify")
+
+    def handle_pause(self, message=None):
+        self.spotify.pause_playback(self.player_name)
+        self.stop_monitor()        
+
+    def handle_listener_started(self, message):
+        if self.play_state.is_playing:
+            self.handle_pause()
+            self.play_state.is_playing = False
+
+            # Start idle check
+            self.idle_count = 0
+            self.cancel_scheduled_event("IdleCheck")
+            self.schedule_repeating_event(
+                self.check_for_idle, None, 1, name="IdleCheck"
+            )       
+
+    def handle_resume_song(self):
+        self.spotify.resume_playback(self.player_name)
+        self.play_state.is_playing = True
+        self.start_monitor()
+
+    def check_for_idle(self):
+        if not self.play_state.is_playing == False:
+            self.cancel_scheduled_event("IdleCheck")
+            return
+
+        self.idle_count += 1
+
+        if self.idle_count >= 2:
+            # Resume playback after 2 seconds of being idle
+            self.cancel_scheduled_event("IdleCheck")
+            self.handle_resume_song()
+
+    # def CPS_match_query_phrase(self, msg: str) -> tuple((str, float, dict)):
+    #     search_term = urllib.parse.quote_plus(msg)
+    #     match_level = CPSMatchLevel.EXACT
+    #     return ('found', match_level, {'original_utterance':search_term})
 
 ###########################################
 
@@ -177,6 +239,7 @@ class JoiMusicSkill(CommonPlaySkill):
         without needing to issue a Skill specific utterance such as media playback 
         or an expired alarm notification.
         """
+        self.spotify.pause_playback(self.player_name)
         return self.shutdown()
 
     def shutdown(self):

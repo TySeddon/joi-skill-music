@@ -55,6 +55,10 @@ class Spotify():
         device = self.get_device_by_name(player_name)
         self.spotify_client.pause_playback(device_id=device.id)
 
+    def resume_playback(self, player_name):
+        device = self.get_device_by_name(player_name)
+        self.spotify_client.start_playback(device_id=device.id)
+
     def get_playback_state(self):
         result = self.spotify_client.current_playback()
         state = munchify(result)
@@ -74,7 +78,7 @@ class Spotify():
             sleep(1)
         except Exception:
             pass
-        
+
     def max_volume(self):
         try:
             self.spotify_client.volume(100)
