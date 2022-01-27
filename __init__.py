@@ -23,6 +23,7 @@ class JoiMusicSkill(MycroftSkill):
         self.learning = True
         self.stopped = False
         self.play_state = None
+        self.spotify = None
 
     def initialize(self):
         """ Perform any final setup needed for the skill here.
@@ -238,7 +239,8 @@ class JoiMusicSkill(MycroftSkill):
 
         self.stop_monitor()
         self.stop_idle_check()
-        self.spotify.pause_playback(self.player_name)
+        if self.spotify:
+            self.spotify.pause_playback(self.player_name)
         if self.play_state:
             self.play_state.is_playing = False
         self.close_browser()
