@@ -44,20 +44,23 @@ class Spotify():
             else:
                 count += 1  
                 print("Device %s not found yet. Trying again." % (player_name))
-                sleep(1)               
+                sleep(1)     
+        return None                          
 
     def start_playback(self, player_name, track_uri):
         device = self.get_device_by_name(player_name)
-        self.spotify_client.start_playback(device_id=device.id, 
-                  uris=[track_uri])
+        if device:
+            self.spotify_client.start_playback(device_id=device.id, uris=[track_uri])
 
     def pause_playback(self, player_name):
         device = self.get_device_by_name(player_name)
-        self.spotify_client.pause_playback(device_id=device.id)
+        if device:
+            self.spotify_client.pause_playback(device_id=device.id)
 
     def resume_playback(self, player_name):
         device = self.get_device_by_name(player_name)
-        self.spotify_client.start_playback(device_id=device.id)
+        if device:
+            self.spotify_client.start_playback(device_id=device.id)
 
     def get_playback_state(self):
         result = self.spotify_client.current_playback()
