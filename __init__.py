@@ -22,6 +22,7 @@ class JoiMusicSkill(MycroftSkill):
         super().__init__()
         self.learning = True
         self.stopped = False
+        self.play_state = None
 
     def initialize(self):
         """ Perform any final setup needed for the skill here.
