@@ -165,7 +165,7 @@ class JoiMusicSkill(MycroftSkill):
 
     def monitor_play_state(self):
         self.play_state = self.spotify.get_playback_state()
-        self.log.info('%.2f %% - Playing = %s - %s' % (self.play_state.progress_pct * 100, self.play_state.is_playing, self.track.name))
+        self.log.info('%.2f %% - Playing=%s - %s - Vol=%.0f %%' % (self.play_state.progress_pct * 100, self.play_state.is_playing, self.track.name, self.play_state.volume_pct))
 
         if not self.play_state.is_playing:
             # if no longer playing, abandon polling after 60 seconds
@@ -187,7 +187,7 @@ class JoiMusicSkill(MycroftSkill):
 
     def handle_listener_started(self, message):
         self.log.info("handle_listener_started")
-        if self.play_state.is_playing:
+        if self.play_state and self.play_state.is_playing:
             self.pause_song()
             self.start_idle_check()
 
@@ -203,7 +203,7 @@ class JoiMusicSkill(MycroftSkill):
 
     def check_for_idle(self):
         self.log.info("check_for_idle")
-        if self.play_state.is_playing:
+        if self.play_state and self.play_state.is_playing:
             self.stop_idle_check()
             return
         self.idle_count += 1
@@ -238,7 +238,8 @@ class JoiMusicSkill(MycroftSkill):
         self.stop_monitor()
         self.stop_idle_check()
         self.spotify.pause_playback(self.player_name)
-        self.play_state.is_playing = False
+        if self.play_state:
+            self.play_state.is_playing = False
         self.close_browser()
         return True
 
