@@ -35,7 +35,7 @@ class Spotify():
     def get_device_by_name(self, player_name):
         found = False
         count = 0
-        while not found and count < 10:
+        while not found and count < 20:
             result = self.spotify_client.devices()
             devices = [munchify(device) for device in result['devices']]
             joi_devices = list(filter(lambda o: (o['name']==player_name), devices))
@@ -69,17 +69,19 @@ class Spotify():
                 'duration_ms' : state.item.duration_ms,
                 'remaining_ms' : state.item.duration_ms - state.progress_ms,
                 'progress_pct' : state.progress_ms / state.item.duration_ms,
+                'volume_pct': state.device.volume_percent
             })
         else:
             return munchify({
                 'is_playing' : False,
-                'progress_ms' : 0,
-                'duration_ms' : 0,
-                'remaining_ms' : 0,
-                'progress_pct' : 0,
+                'progress_ms' : None,
+                'duration_ms' : None,
+                'remaining_ms' : None,
+                'progress_pct' : None,
+                'volume_pct': None
             })
 
-    def reduce_volume(self):
+    def fade_volume(self):
         try:
             self.spotify_client.volume(50)
             sleep(1)
@@ -93,3 +95,9 @@ class Spotify():
             self.spotify_client.volume(100)
         except Exception:
             pass
+
+    def set_volume(self, volume_pct):
+        try:
+            self.spotify_client.volume(volume_pct)
+        except Exception:
+            pass            

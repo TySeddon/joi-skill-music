@@ -76,6 +76,7 @@ class JoiMusicSkill(MycroftSkill):
         self.log.info("session_end")
         if self.stopped: return 
         self.speak_dialog(key="Session_End")
+        sleep(5)
         self.close_browser()
 
     def song_intro(self, track):
@@ -176,7 +177,7 @@ class JoiMusicSkill(MycroftSkill):
             # song is done, so follow-up with user and start next song
             self.stop_monitor()
 
-            self.spotify.reduce_volume()
+            self.spotify.fade_volume()
             self.spotify.pause_playback(self.player_name)
             self.song_followup(self.track)
 
