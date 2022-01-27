@@ -11,6 +11,7 @@ import webbrowser
 from time import sleep
 import uuid
 import urllib.parse
+import os
 
 class JoiMusicSkill(MycroftSkill):
     def __init__(self):
@@ -59,16 +60,23 @@ class JoiMusicSkill(MycroftSkill):
         self.session_tracks = self.shuffle_tracks(tracks)
 
         # launch music player
-        self.player_name = "Joi-%s" % (uuid.uuid4())
-        url = "%s/joi/spotify?name=%s&token=%s" % (globals.JOI_SERVER_URL, self.player_name, self.spotify.access_token)
-        webbrowser.open(url=url, new=0, autoraise=True)
+        self.open_browser()
 
         self.start_next_song(False)
+
+    def open_browser(self):
+        self.player_name = "Joi-%s" % (uuid.uuid4())
+        url = "%s/joi/spotify?name=%s&token=%s" % (globals.JOI_SERVER_URL, self.player_name, self.spotify.access_token)
+        webbrowser.open(url=url)
+
+    def close_browser(self):
+        os.system("killall chromium-browser")
 
     def session_end(self):
         self.log.info("session_end")
         if self.stopped: return 
         self.speak_dialog(key="Session_End")
+        self.close_browser()
 
     def song_intro(self, track):
         self.log.info("song_intro")
@@ -230,7 +238,7 @@ class JoiMusicSkill(MycroftSkill):
         self.stop_idle_check()
         self.spotify.pause_playback(self.player_name)
         self.play_state.is_playing = False
-
+        self.close_browser()
         return True
 
     def shutdown(self):
