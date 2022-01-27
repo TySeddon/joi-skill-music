@@ -25,6 +25,14 @@ when no instruction given
 then music will resume
 
 Given session is playing
-when say "Hy Mycroft, stop"
+when say "Hey Mycroft, stop"
 then skill will stop
+
+Given song is playing
+when song ends
+then system says a follow-up dialog
+
+Given song is not playing
+when song starts
+then system says an intro dialog
 
