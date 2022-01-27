@@ -121,8 +121,8 @@ class JoiMusicSkill(MycroftSkill):
             if self.stopped: return False
             self.log.info("Starting song %s" % (self.track.name))
             self.song_intro(self.track)
-            self.spotify.max_volume()
             self.spotify.start_playback(self.player_name, self.track.uri)
+            self.spotify.max_volume()
             self.start_monitor()
             return True
         else:
