@@ -31,6 +31,8 @@ class JoiMusicSkill(MycroftSkill):
         #self.add_event("mycroft.stop", self.stop)
         self.add_event("recognizer_loop:record_begin", self.handle_listener_started)
 
+    ###########################################
+
     @intent_handler(IntentBuilder('PlayMusicIntent').require('Music').optionally("Play"))
     def handle_play_music_intent(self, message):
         """ This is an Adapt intent handler, it is triggered by a keyword."""
@@ -58,7 +60,8 @@ class JoiMusicSkill(MycroftSkill):
 
         # launch music player
         self.player_name = "Joi-%s" % (uuid.uuid4())
-        webbrowser.open("%s/joi/spotify?name=%s&token=%s" % (globals.JOI_SERVER_URL, self.player_name, self.spotify.access_token))
+        url = "%s/joi/spotify?name=%s&token=%s" % (globals.JOI_SERVER_URL, self.player_name, self.spotify.access_token)
+        webbrowser.open(url=url, new=0, autoraise=True)
 
         self.start_next_song(False)
 
@@ -86,6 +89,8 @@ class JoiMusicSkill(MycroftSkill):
                                 "resident_name": self.resident_name,
                                 },
                           wait=True)
+
+    ###########################################
 
     def shuffle_tracks(self, tracks):
          return random.sample(tracks,5)
@@ -199,7 +204,7 @@ class JoiMusicSkill(MycroftSkill):
             if self.stopped: return
             self.resume_song()
 
-###########################################
+    ###########################################
 
     # def converse(self, utterances, lang):
     #     """ The converse method can be used to handle follow up utterances 
