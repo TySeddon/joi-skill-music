@@ -20,8 +20,8 @@ In home director create file called update-skills.sh
     echo "----Installing joi-skill-music----"
     ./mycroft-msm install https://github.com/TySeddon/joi-skill-music.git
 
-Make script executable
-    chmod +x update-skills.sh
+Make script executable and writeable
+    sudo chmod a+xw update-skills.sh
 
 ## One-Time Raspberry Pi setup
     cd ~/mycroft-core        

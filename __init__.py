@@ -77,7 +77,8 @@ class JoiMusicSkill(MycroftSkill):
     def session_end(self):
         self.log.info("session_end")
         if self.stopped: return 
-        self.speak_dialog(key="Session_End")
+        self.speak_dialog(key="Session_End",
+                          data={"resident_name": self.resident_name})
         sleep(5)
         self.close_browser()
 
