@@ -5,6 +5,7 @@ from adapt.intent import IntentBuilder
 from mycroft import MycroftSkill, intent_handler
 from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel
 from mycroft.messagebus import Message
+from mycroft.audio import wait_while_speaking
 from .spotify import Spotify
 from .globals import *
 import webbrowser
@@ -64,12 +65,14 @@ class JoiMusicSkill(MycroftSkill):
         # launch music player
         self.open_browser()
 
+        wait_while_speaking()
+        
         self.start_next_song(False)
 
     def open_browser(self):
         self.player_name = "Joi-%s" % (uuid.uuid4())
         url = "%s/joi/spotify?name=%s&token=%s" % (globals.JOI_SERVER_URL, self.player_name, self.spotify.access_token)
-        webbrowser.open(url=url)
+        webbrowser.open(url=url, autoraise=True)
 
     def close_browser(self):
         os.system("killall chromium-browser")
@@ -79,6 +82,7 @@ class JoiMusicSkill(MycroftSkill):
         if self.stopped: return 
         self.speak_dialog(key="Session_End",
                           data={"resident_name": self.resident_name})
+        wait_while_speaking()
         sleep(5)
         self.close_browser()
 
@@ -123,6 +127,7 @@ class JoiMusicSkill(MycroftSkill):
             if self.stopped: return False
             self.log.info("Starting song %s" % (self.track.name))
             self.song_intro(self.track)
+            wait_while_speaking()
             self.spotify.start_playback(self.player_name, self.track.uri)
             self.spotify.max_volume()
             self.start_monitor()
@@ -175,6 +180,7 @@ class JoiMusicSkill(MycroftSkill):
             self.not_playing_count += 1
             if self.not_playing_count > 60:
                 self.stop_monitor()
+                return
 
         if self.is_song_done():
             # song is done, so follow-up with user and start next song
@@ -183,10 +189,12 @@ class JoiMusicSkill(MycroftSkill):
             self.spotify.fade_volume()
             self.spotify.pause_playback(self.player_name)
             self.song_followup(self.track)
+            wait_while_speaking()
 
             started = self.start_next_song(True)
             if not started:
-                self.session_end()        
+                self.session_end()      
+                return  
 
     def handle_listener_started(self, message):
         self.log.info("handle_listener_started")
