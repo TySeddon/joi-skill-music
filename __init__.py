@@ -66,7 +66,7 @@ class JoiMusicSkill(MycroftSkill):
         self.open_browser()
 
         wait_while_speaking()
-        
+
         self.start_next_song(False)
 
     def open_browser(self):
@@ -93,8 +93,7 @@ class JoiMusicSkill(MycroftSkill):
                           data={"artist_name": track.artists[0].name,
                                 "song_name": track.name,
                                 "resident_name": self.resident_name,
-                                },
-                          wait=True)
+                                })
 
     def song_followup(self, track):
         self.log.info("song_followup")
@@ -103,8 +102,7 @@ class JoiMusicSkill(MycroftSkill):
                           data={"artist_name": track.artists[0].name,
                                 "song_name": track.name,
                                 "resident_name": self.resident_name,
-                                },
-                          wait=True)
+                                })
 
     ###########################################
 
