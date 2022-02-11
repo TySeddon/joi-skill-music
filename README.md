@@ -28,6 +28,9 @@ Make script executable and writeable
     source venv-activate.sh  
     pip install munch
     pip install spotipy==2.19.0
+    pip install amcrest
+    pip install pandas
+
 
 
 ### Chrome Configure
@@ -75,7 +78,8 @@ Chromse does not allow videos to automatically play (autoplay).  This can be ove
     pip install adapt-parser
     pip install munch
     pip install spotipy
-
+    pip install amcrest
+    pip install pandas
 
 ## Update requirements.txt
     pip freeze > requirements.txt
