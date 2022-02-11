@@ -70,8 +70,8 @@ class JoiMusicSkill(MycroftSkill):
         self.start_next_song(False)
 
     def open_browser(self):
-        self.player_name = "Joi-%s" % (uuid.uuid4())
-        url = "%s/joi/spotify?name=%s&token=%s" % (globals.JOI_SERVER_URL, self.player_name, self.spotify.access_token)
+        self.player_name = f"Joi-{uuid.uuid4()}"
+        url = f"{globals.JOI_SERVER_URL}/joi/spotify?name={self.player_name}&token={self.spotify.access_token}"
         webbrowser.open(url=url, autoraise=True)
 
     def close_browser(self):
@@ -123,7 +123,7 @@ class JoiMusicSkill(MycroftSkill):
             if pauseFirst:
                 sleep(5)
             if self.stopped: return False
-            self.log.info("Starting song %s" % (self.track.name))
+            self.log.info(f"Starting song {self.track.name}")
             self.song_intro(self.track)
             wait_while_speaking()
             self.spotify.start_playback(self.player_name, self.track.uri)
