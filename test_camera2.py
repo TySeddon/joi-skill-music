@@ -141,6 +141,10 @@ def chunk(lst, n):
     for i in range(0,len(lst), n):
         yield lst[i:i+n]
 
+def set_privacy_mode(camera, mode):
+    #camera.set_privacy(False)
+    camera.command(f"configManager.cgi?action=setConfig&LeLensMask[0].Enable={str(mode).lower()}")
+
 ############################
 
 seconds_length = 20
@@ -148,6 +152,11 @@ camera = AmcrestCamera('192.168.1.27', 80, 'admin', PASSWORD).camera
 
 #Check software information
 print(camera.software_information)
+
+
+set_privacy_mode(camera, False)
+camera.ptz_control_command(action="start", code="PositionABS", arg1=180, arg2=0, arg3=0)
+camera.ptz_control_command(action="start", code="PositionABS", arg1=180, arg2=30, arg3=0)
 
 is_done = False
 is_motion = False
@@ -161,6 +170,8 @@ t.start()
 start_time, end_time, motion_event_pairs = asyncio.run(read_camera_motion_async(camera, seconds_length))
 # stop real-time report thread
 is_done = True
+
+set_privacy_mode(camera, True)
 
 history = build_motion_history(start_time, end_time, motion_event_pairs)
 print(history)
