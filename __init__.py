@@ -248,7 +248,10 @@ class JoiMusicSkill(MycroftSkill):
         self.stop_monitor()
         self.stop_idle_check()
         if self.spotify:
-            self.spotify.pause_playback(self.player_name)
+            try:
+                self.spotify.pause_playback(self.player_name)
+            except Exception as ex:
+                self.log.warn(f"Failed to pause of {self.player_name}")
         if self.play_state:
             self.play_state.is_playing = False
         self.close_browser()

@@ -54,12 +54,12 @@ class Spotify():
 
     def pause_playback(self, player_name):
         device = self.get_device_by_name(player_name)
-        if device and self.spotify_client:
+        if device and device.id and self.spotify_client:
             self.spotify_client.pause_playback(device_id=device.id)
 
     def resume_playback(self, player_name):
         device = self.get_device_by_name(player_name)
-        if device and self.spotify_client:
+        if device and device.id and self.spotify_client:
             self.spotify_client.start_playback(device_id=device.id)
 
     def get_playback_state(self):
