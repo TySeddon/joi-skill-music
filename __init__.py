@@ -171,10 +171,10 @@ class JoiMusicSkill(MycroftSkill):
 
     def monitor_play_state(self):
         self.play_state = self.spotify.get_playback_state()
-        if self.play_state:
+        if self.play_state.progress_pct:
             self.log.info('%.2f %% - Playing=%s - %s - Vol=%.0f %%' % (self.play_state.progress_pct * 100, self.play_state.is_playing, self.track.name, self.play_state.volume_pct))
 
-        if not self.play_state or not self.play_state.is_playing:
+        if not self.play_state.is_playing:
             # if no longer playing, abandon polling after 60 seconds
             self.not_playing_count += 1
             if self.not_playing_count > 60:
