@@ -34,6 +34,7 @@ class JoiMusicSkill(MycroftSkill):
         my_setting = self.settings.get('my_setting')
         #self.add_event("mycroft.stop", self.stop)
         self.add_event("recognizer_loop:record_begin", self.handle_listener_started)
+        self.add_event("skill.joi-skill-music.stop", self.stop)
 
     ###########################################
 
@@ -42,6 +43,9 @@ class JoiMusicSkill(MycroftSkill):
         """ This is an Adapt intent handler, it is triggered by a keyword."""
         self.log.info("handle_play_music_intent")
         self.stopped = False
+
+        # stop the photo player (in case it is running)
+        self.bus.emit(Message("skill.joi-skill-photo.stop"))
 
         self.resident_name = "Ruth"
 
