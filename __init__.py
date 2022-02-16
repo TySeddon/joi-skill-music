@@ -337,6 +337,9 @@ class JoiMusicSkill(MycroftSkill):
         self.log.info("mycroft.stop")
         self.stopped = True
 
+        if hasattr(self, 'camera_operator') and self.camera_operator:
+            self.camera_operator.set_privacy_mode(True)
+
         self.stop_monitor()
         self.stop_idle_check()
         if self.spotify:
