@@ -128,7 +128,7 @@ class JoiMusicSkill(MycroftSkill):
         if hasattr(self, 'camera_motion') and self.camera_motion:
             # start detecting motion
             loop = asyncio.new_event_loop()
-            task = asyncio.Task(self.camera_motion.read_camera_motion_async(seconds_length))
+            task = asyncio.Task(self.camera_motion.read_camera_motion_async(seconds_length), loop=loop)
             task.add_done_callback(self.handle_motion_detect_done)
 
     def stop_motion_detection(self):
