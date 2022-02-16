@@ -18,6 +18,7 @@ from .enviro import get_setting
 from .camera.motion import MotionDetection
 from .camera.operator import CameraOperator
 from .camera.finder import CameraFinder
+from ifaddr import get_adapters
 
 class JoiMusicSkill(MycroftSkill):
 
@@ -92,11 +93,24 @@ class JoiMusicSkill(MycroftSkill):
 
         self.start_next_song(False)
 
+    def get_ip_addresses(self):
+        result = []
+        for iface in get_adapters():
+            for addr in iface.ips:
+                if addr.is_IPv4:
+                    result.append(addr.ip)
+                    break
+        return result  
+
     def setup_camera(self):
         CAMERA_NAME = get_setting('camera_name')
         CAMERA_USERNAME = get_setting('camera_username')
         CAMERA_PASSWORD = get_setting('camera_password')
-        MY_IP_ADDRESS = socket.gethostbyname(socket.gethostname())
+        ip_addresses = self.get_ip_addresses()
+        if not ip_addresses:
+            self.log.error("Could not determine IP address")
+            return None
+        MY_IP_ADDRESS = ip_addresses[0]
         subnet = f"{MY_IP_ADDRESS}/24"
 
         self.log.info(f"Searching for camera '{CAMERA_NAME}' on subnet {subnet}")
@@ -111,19 +125,19 @@ class JoiMusicSkill(MycroftSkill):
         return camera
 
     def start_motion_detection(self, seconds_length):
-        if self.camera_motion:
+        if hasattr(self, 'camera_motion') and self.camera_motion:
             # start detecting motion
             task = asyncio.Task(self.camera_motion.read_camera_motion_async(seconds_length))
             task.add_done_callback(self.handle_motion_detect_done)
 
     def stop_motion_detection(self):
-        if self.camera_motion:
+        if hasattr(self, 'camera_motion') and self.camera_motion:
             # send a cancelation signal to motion detection.
             # handle_motion_detect_done will be called once it has stopped
             self.camera_motion.cancel()
 
     def handle_motion_detect_done(self, task: asyncio.Task):
-        if self.camera_motion:
+        if hasattr(self, 'camera_motion') and self.camera_motion:
             # stop motion detection
             self.camera_motion.stop()
             # get motion data
@@ -132,7 +146,7 @@ class JoiMusicSkill(MycroftSkill):
             self.create_motion_report(start_time, end_time, motion_event_pairs)
 
     def create_motion_report(self, start_time, end_time, motion_event_pairs):
-        if self.camera_motion:
+        if hasattr(self, 'camera_motion') and self.camera_motion:
             history = self.camera_motion.build_motion_history(start_time, end_time, motion_event_pairs)
             print(history)
             self.motion_report = ""

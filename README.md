@@ -30,6 +30,7 @@ Make script executable and writeable
     pip install spotipy==2.19.0
     pip install amcrest
     pip install pandas
+    pip install ifaddr
 
 
 ### Chrome Configure
@@ -79,6 +80,7 @@ Chromse does not allow videos to automatically play (autoplay).  This can be ove
     pip install spotipy
     pip install amcrest
     pip install pandas
+    pip install ifaddr
 
 ## Update requirements.txt
     pip freeze > requirements.txt

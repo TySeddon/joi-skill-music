@@ -3,6 +3,7 @@ import socket
 from contextlib import closing
 from camera.finder import CameraFinder
 from enviro import get_setting
+from ifaddr import get_adapters
 
 # manual test of single ip
 __RTSP_PORT = 554
@@ -15,6 +16,21 @@ with closing(socket.socket()) as sock:
     sock.connect((ipaddr, __HTTP_PORT))
 # with closing(socket.socket()) as sock:
 #     sock.connect((ipaddr, __PWGPSI_PORT))
+
+
+
+def get_ip_addresses():
+    result = []
+    for iface in get_adapters():
+        for addr in iface.ips:
+            if addr.is_IPv4:
+                result.append(addr.ip)
+                break
+    return result  
+
+ip_addresses = [o for o in get_ip_addresses() if not o.startswith("169") and not o.startswith("127")]
+print(ip_addresses)
+
 
 CAMERA_NAME = get_setting('camera_name')
 CAMERA_USERNAME = get_setting('camera_username')
