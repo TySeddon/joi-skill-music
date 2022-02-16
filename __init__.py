@@ -19,6 +19,7 @@ from .camera.motion import MotionDetection
 from .camera.operator import CameraOperator
 from .camera.finder import CameraFinder
 from ifaddr import get_adapters
+import threading
 
 class JoiMusicSkill(MycroftSkill):
 
@@ -95,6 +96,8 @@ class JoiMusicSkill(MycroftSkill):
 
         self.start_next_song(False)
 
+    ##################################
+
     def get_ip_addresses(self):
         result = []
         for iface in get_adapters():
@@ -126,12 +129,19 @@ class JoiMusicSkill(MycroftSkill):
         camera = AmcrestCamera(camera_ip_address, 80, CAMERA_USERNAME, CAMERA_PASSWORD).camera
         return camera
 
+    def _run_motion_detection(self, seconds_length):        
+        start_time, end_time, motion_event_pairs = self.motion_loop.run_until_complete(self.camera_motion.read_camera_motion_async(seconds_length))
+        self.log.info(motion_event_pairs)
+
     def start_motion_detection(self, seconds_length):
         if hasattr(self, 'camera_motion') and self.camera_motion:
             self.log.info('starting motion detection')
             # start detecting motion
-            self.motion_task = asyncio.create_task(self.camera_motion.read_camera_motion_async(seconds_length), loop=self.motion_loop)
-            self.motion_task.add_done_callback(self.handle_motion_detect_done)
+            #self.motion_task = self.motion_loop.create_task(self.camera_motion.read_camera_motion_async(seconds_length))
+            #self.motion_task.add_done_callback(self.handle_motion_detect_done)
+
+            motion_thread = threading.Thread(target=self._run_motion_detection, args=(seconds_length))
+            motion_thread.start()
 
     def stop_motion_detection(self):
         if hasattr(self, 'camera_motion') and self.camera_motion:
@@ -157,7 +167,7 @@ class JoiMusicSkill(MycroftSkill):
             self.log.info(history)
             self.motion_report = ""
 
-
+    ##################################
 
     def open_browser(self):
         self.player_name = f"Joi-{uuid.uuid4()}"
