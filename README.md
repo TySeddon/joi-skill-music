@@ -32,7 +32,6 @@ Make script executable and writeable
     pip install pandas
 
 
-
 ### Chrome Configure
 
 #### Install “chrome widevine”

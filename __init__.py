@@ -52,7 +52,7 @@ class JoiMusicSkill(MycroftSkill):
         self.start(start_method=f"User said: {message.data['utterance']}")
 
     def start(self, start_method):
-        self.log.log("start")
+        self.log.info("start")
         self.stopped = False
 
         # stop the photo player (in case it is running)
