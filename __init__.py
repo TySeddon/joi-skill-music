@@ -10,15 +10,14 @@ from .spotify import Spotify
 import webbrowser
 from time import sleep
 import uuid
-import urllib.parse
 import os
-from .enviro import get_setting
-from camera.motion import MotionDetection
-from camera.operator import CameraOperator
-from camera.finder import CameraFinder
 from amcrest import AmcrestCamera
 import socket
 import asyncio
+from .enviro import get_setting
+from .camera.motion import MotionDetection
+from .camera.operator import CameraOperator
+from .camera.finder import CameraFinder
 
 class JoiMusicSkill(MycroftSkill):
 
