@@ -7,14 +7,17 @@ from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel
 from mycroft.messagebus import Message
 from mycroft.audio import wait_while_speaking
 from .spotify import Spotify
-from .globals import *
 import webbrowser
 from time import sleep
 import uuid
 import urllib.parse
 import os
+from .enviro import get_setting
 
 class JoiMusicSkill(MycroftSkill):
+
+    
+
     def __init__(self):
         """ The __init__ method is called when the Skill is first constructed.
         It is often used to declare variables or perform setup actions, however
@@ -25,6 +28,7 @@ class JoiMusicSkill(MycroftSkill):
         self.stopped = False
         self.play_state = None
         self.spotify = None
+        self.JOI_SERVER_URL = get_setting('joi_server_url')
 
     def initialize(self):
         """ Perform any final setup needed for the skill here.
@@ -75,7 +79,7 @@ class JoiMusicSkill(MycroftSkill):
 
     def open_browser(self):
         self.player_name = f"Joi-{uuid.uuid4()}"
-        url = f"{globals.JOI_SERVER_URL}/joi/spotify?name={self.player_name}&token={self.spotify.access_token}"
+        url = f"{self.JOI_SERVER_URL}/joi/spotify?name={self.player_name}&token={self.spotify.access_token}"
         webbrowser.open(url=url, autoraise=True)
 
     def close_browser(self):

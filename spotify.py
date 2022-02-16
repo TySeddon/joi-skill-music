@@ -1,12 +1,17 @@
 from time import sleep
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from .globals import *
+from .enviro import get_setting
 from munch import munchify
 
 class Spotify():
 
     def __init__(self):
+        SPOTIPY_CLIENT_ID = get_setting('spotipy_client_id')
+        SPOTIPY_CLIENT_SECRET = get_setting('spotipy_client_secret')
+        SPOTIPY_REDIRECT_URI = get_setting('spotipy_redirect_uri')
+        SPOTIPY_SCOPES = get_setting('spotipy_scopes')
+
         # setup credentials
         self.client_credentials_manager=SpotifyOAuth(
             client_id=SPOTIPY_CLIENT_ID, 
