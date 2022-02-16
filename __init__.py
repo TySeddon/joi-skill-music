@@ -13,10 +13,14 @@ import uuid
 import urllib.parse
 import os
 from .enviro import get_setting
+from camera.motion import MotionDetection
+from camera.operator import CameraOperator
+from camera.finder import CameraFinder
+from amcrest import AmcrestCamera
+import socket
+import asyncio
 
 class JoiMusicSkill(MycroftSkill):
-
-    
 
     def __init__(self):
         """ The __init__ method is called when the Skill is first constructed.
@@ -46,12 +50,24 @@ class JoiMusicSkill(MycroftSkill):
     def handle_play_music_intent(self, message):
         """ This is an Adapt intent handler, it is triggered by a keyword."""
         self.log.info("handle_play_music_intent")
+        self.start(start_method=f"User said: {message.data['utterance']}")
+
+    def start(self, start_method):
+        self.log.log("start")
         self.stopped = False
 
         # stop the photo player (in case it is running)
         self.bus.emit(Message("skill.joi-skill-photo.stop"))
 
         self.resident_name = "Ruth"
+
+        # setup camera
+        self.camera = self.setup_camera()
+        if self.camera:
+            self.camera_operator = CameraOperator(self.camera)
+            self.camera_motion = MotionDetection(self.camera)
+            self.camera_operator.set_privacy_mode(False)
+            self.camera_operator.set_absolute_position(180,30,0)
 
         # start the session
         self.speak_dialog(key="Session_Start", 
@@ -76,6 +92,53 @@ class JoiMusicSkill(MycroftSkill):
         wait_while_speaking()
 
         self.start_next_song(False)
+
+    def setup_camera(self):
+        CAMERA_NAME = get_setting('camera_name')
+        CAMERA_USERNAME = get_setting('camera_username')
+        CAMERA_PASSWORD = get_setting('camera_password')
+        MY_IP_ADDRESS = socket.gethostbyname(socket.gethostname())
+        subnet = f"{MY_IP_ADDRESS}/24"
+
+        self.log.info(f"Searching for camera '{CAMERA_NAME}' on subnet {subnet}")
+        finder = CameraFinder(CAMERA_NAME, CAMERA_USERNAME, CAMERA_PASSWORD)
+        found_devices = finder.scan_devices(subnet)
+        if not found_devices:
+            self.log.error(f"Camera '{CAMERA_NAME}' not found on subnet {subnet}")
+            return None
+        camera_ip_address = found_devices[0]
+        self.log.info(f"Found camera at {camera_ip_address}")
+        camera = AmcrestCamera(camera_ip_address, 80, CAMERA_USERNAME, CAMERA_PASSWORD).camera
+        return camera
+
+    def start_motion_detection(self, seconds_length):
+        if self.camera_motion:
+            # start detecting motion
+            task = asyncio.Task(self.camera_motion.read_camera_motion_async(seconds_length))
+            task.add_done_callback(self.handle_motion_detect_done)
+
+    def stop_motion_detection(self):
+        if self.camera_motion:
+            # send a cancelation signal to motion detection.
+            # handle_motion_detect_done will be called once it has stopped
+            self.camera_motion.cancel()
+
+    def handle_motion_detect_done(self, task: asyncio.Task):
+        if self.camera_motion:
+            # stop motion detection
+            self.camera_motion.stop()
+            # get motion data
+            start_time, end_time, motion_event_pairs = task.result()
+            # create a motion report
+            self.create_motion_report(start_time, end_time, motion_event_pairs)
+
+    def create_motion_report(self, start_time, end_time, motion_event_pairs):
+        if self.camera_motion:
+            history = self.camera_motion.build_motion_history(start_time, end_time, motion_event_pairs)
+            print(history)
+            self.motion_report = ""
+
+
 
     def open_browser(self):
         self.player_name = f"Joi-{uuid.uuid4()}"
@@ -133,6 +196,8 @@ class JoiMusicSkill(MycroftSkill):
             if self.stopped: return False
             self.log.info(f"Starting song {self.track.name}")
             self.song_intro(self.track)
+            self.log.info(f"Song duration {self.track.duration_ms}ms")
+            self.start_motion_detection(self.track.duration_ms / 1000)
             wait_while_speaking()
             self.spotify.start_playback(self.player_name, self.track.uri)
             self.spotify.max_volume()
@@ -192,10 +257,14 @@ class JoiMusicSkill(MycroftSkill):
         if self.is_song_done():
             # song is done, so follow-up with user and start next song
             self.stop_monitor()
+            self.stop_motion_detection()
 
             self.spotify.fade_volume()
             self.spotify.pause_playback(self.player_name)
             self.song_followup(self.track)
+
+            # todo: generate motion report and submit to Joi server
+
             wait_while_speaking()
 
             started = self.start_next_song(True)

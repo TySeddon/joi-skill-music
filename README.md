@@ -87,3 +87,14 @@ Chromse does not allow videos to automatically play (autoplay).  This can be ove
 ## Load Required Packages
 Create your virtual environment, then load all the required dependencies with:
     pip install -r requirements.txt
+
+
+## Spotify API
+Based on simple REST principles, the Spotify Web API endpoints return JSON metadata about music artists, albums, and tracks, directly from the Spotify Data Catalogue.
+
+https://developer.spotify.com/documentation/web-api/reference/
+
+### Web Playback SDK
+The Spotify Web Playback SDK is a public JavaScript SDK that allows you to implement local streaming playback of Spotify content in their web applications.
+
+https://developer.spotify.com/documentation/web-playback-sdk/reference/

@@ -17,9 +17,10 @@ with closing(socket.socket()) as sock:
 #     sock.connect((ipaddr, __PWGPSI_PORT))
 
 CAMERA_NAME = get_setting('camera_name')
+CAMERA_USERNAME = get_setting('camera_username')
 CAMERA_PASSWORD = get_setting('camera_password')
 MY_IP_ADDRESS = socket.gethostbyname(socket.gethostname())
 # scan ip range for a given camera name
-finder = CameraFinder(CAMERA_NAME, 'admin', CAMERA_PASSWORD)
+finder = CameraFinder(CAMERA_NAME, CAMERA_USERNAME, CAMERA_PASSWORD)
 found_devices = finder.scan_devices(f"{MY_IP_ADDRESS}/24")
 print(found_devices)

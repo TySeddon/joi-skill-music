@@ -7,7 +7,9 @@ import webbrowser
 from time import sleep
 from pprint import pprint
 import asyncio
-from globals import *
+from enviro import get_setting
+
+JOI_SERVER_URL = get_setting('joi_server_url')
 
 # login to Spotify
 sp = Spotify()

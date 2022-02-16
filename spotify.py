@@ -34,7 +34,7 @@ class Spotify():
 
     def get_playlist_tracks(self, playlist_id):
         results = self.spotify_client.playlist_items(playlist_id,
-                        fields='items.track.name,items.track.uri,items.track.artists.name,items.track.artists.uri')
+                        fields='items.track.name,items.track.uri,items.track.artists.name,items.track.artists.uri,items.track.duration_ms,items.track.explicit')
         return [munchify(item['track']) for item in list(results['items'])]
 
     def get_device_by_name(self, player_name):

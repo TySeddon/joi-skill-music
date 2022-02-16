@@ -10,12 +10,13 @@ from enviro import get_setting
 import socket
 
 CAMERA_NAME = get_setting('camera_name')
+CAMERA_USERNAME = get_setting('camera_username')
 CAMERA_PASSWORD = get_setting('camera_password')
 MY_IP_ADDRESS = socket.gethostbyname(socket.gethostname())
 
 seconds_length = 20
 
-finder = CameraFinder(CAMERA_NAME, 'admin', CAMERA_PASSWORD)
+finder = CameraFinder(CAMERA_NAME, CAMERA_USERNAME, CAMERA_PASSWORD)
 found_devices = finder.scan_devices(f"{MY_IP_ADDRESS}/24")
 if found_devices:
     camera_ip_address = found_devices[0]
@@ -23,7 +24,7 @@ else:
     print(f"Camera '{CAMERA_NAME}' not found on network")
     quit()    
 
-camera = AmcrestCamera(camera_ip_address, 80, 'admin', CAMERA_PASSWORD).camera
+camera = AmcrestCamera(camera_ip_address, 80, CAMERA_USERNAME, CAMERA_PASSWORD).camera
 #Check software information
 print(camera.software_information)
 
