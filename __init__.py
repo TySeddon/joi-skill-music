@@ -67,7 +67,7 @@ class JoiMusicSkill(MycroftSkill):
             self.motion_loop = asyncio.new_event_loop()
             self.camera_operator = CameraOperator(self.camera)
             self.camera_motion = MotionDetection(self.camera, self.motion_loop)
-            self.camera_operator.set_privacy_mode(False)
+            self.set_privacy_mode(False)
             self.camera_operator.set_absolute_position(180,0,0)
             self.camera_operator.set_absolute_position(180,30,0)
 
@@ -128,6 +128,7 @@ class JoiMusicSkill(MycroftSkill):
 
     def start_motion_detection(self, seconds_length):
         if hasattr(self, 'camera_motion') and self.camera_motion:
+            self.log.info('starting motion detection')
             # start detecting motion
             self.motion_task = self.motion_loop.create_task(self.camera_motion.read_camera_motion_async(seconds_length))
             self.motion_task.add_done_callback(self.handle_motion_detect_done)
@@ -136,9 +137,11 @@ class JoiMusicSkill(MycroftSkill):
         if hasattr(self, 'camera_motion') and self.camera_motion:
             # send a cancelation signal to motion detection.
             # handle_motion_detect_done will be called once it has stopped
+            self.log.info('stopping motion detection')
             self.camera_motion.cancel()
 
     async def handle_motion_detect_done(self):
+        self.log.info('handle_motion_detect_done')
         if hasattr(self, 'camera_motion') and self.camera_motion:
             # stop motion detection
             self.camera_motion.stop()
@@ -148,6 +151,7 @@ class JoiMusicSkill(MycroftSkill):
             self.create_motion_report(start_time, end_time, motion_event_pairs)
 
     def create_motion_report(self, start_time, end_time, motion_event_pairs):
+        self.log.info('create_motion_report')
         if hasattr(self, 'camera_motion') and self.camera_motion:
             history = self.camera_motion.build_motion_history(start_time, end_time, motion_event_pairs)
             self.log.info(history)
@@ -168,6 +172,7 @@ class JoiMusicSkill(MycroftSkill):
         if self.stopped: return 
         self.speak_dialog(key="Session_End",
                           data={"resident_name": self.resident_name})
+        self.set_privacy_mode(True)
         wait_while_speaking()
         sleep(5)
         self.close_browser()
@@ -328,6 +333,10 @@ class JoiMusicSkill(MycroftSkill):
     #     else:
     #         return False        
 
+    def set_privacy_mode(self, mode):
+        if hasattr(self, 'camera_operator') and self.camera_operator:
+            self.camera_operator.set_privacy_mode(mode)
+
     def stop(self):
         """ The stop method is called anytime a User says "Stop" or a similar command. 
         It is useful for stopping any output or process that a User might want to end 
@@ -337,8 +346,7 @@ class JoiMusicSkill(MycroftSkill):
         self.log.info("mycroft.stop")
         self.stopped = True
 
-        if hasattr(self, 'camera_operator') and self.camera_operator:
-            self.camera_operator.set_privacy_mode(True)
+        self.set_privacy_mode(True)
 
         self.stop_monitor()
         self.stop_idle_check()
