@@ -150,7 +150,7 @@ class JoiMusicSkill(MycroftSkill):
     def create_motion_report(self, start_time, end_time, motion_event_pairs):
         if hasattr(self, 'camera_motion') and self.camera_motion:
             history = self.camera_motion.build_motion_history(start_time, end_time, motion_event_pairs)
-            print(history)
+            self.log.info(history)
             self.motion_report = ""
 
 
