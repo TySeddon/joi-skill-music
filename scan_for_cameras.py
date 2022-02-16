@@ -25,7 +25,6 @@ def get_ip_addresses():
         for addr in iface.ips:
             if addr.is_IPv4:
                 result.append(addr.ip)
-                break
     return result  
 
 ip_addresses = [o for o in get_ip_addresses() if not o.startswith("169") and not o.startswith("127")]

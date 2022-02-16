@@ -99,14 +99,14 @@ class JoiMusicSkill(MycroftSkill):
             for addr in iface.ips:
                 if addr.is_IPv4:
                     result.append(addr.ip)
-                    break
         return result  
 
     def setup_camera(self):
         CAMERA_NAME = get_setting('camera_name')
         CAMERA_USERNAME = get_setting('camera_username')
         CAMERA_PASSWORD = get_setting('camera_password')
-        ip_addresses = self.get_ip_addresses()
+        ip_addresses = [o for o in self.get_ip_addresses() if not o.startswith("169") and not o.startswith("127")]
+        self.log.info(ip_addresses)
         if not ip_addresses:
             self.log.error("Could not determine IP address")
             return None
