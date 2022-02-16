@@ -143,7 +143,6 @@ class JoiMusicSkill(MycroftSkill):
             # stop motion detection
             self.camera_motion.stop()
             # get motion data
-            await self.motion_task
             start_time, end_time, motion_event_pairs = self.motion_task.result()
             # create a motion report
             self.create_motion_report(start_time, end_time, motion_event_pairs)
