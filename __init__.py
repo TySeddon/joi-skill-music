@@ -63,9 +63,9 @@ class JoiMusicSkill(MycroftSkill):
         self.resident_name = "Ruth"
 
         # setup camera
+        self.motion_loop = asyncio.get_event_loop()
         self.camera = self.setup_camera()
         if self.camera:
-            self.motion_loop = asyncio.new_event_loop()
             self.camera_operator = CameraOperator(self.camera)
             self.camera_motion = MotionDetection(self.camera, self.motion_loop)
             self.set_privacy_mode(False)
