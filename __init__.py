@@ -136,7 +136,7 @@ class JoiMusicSkill(MycroftSkill):
         if hasattr(self, 'camera_motion') and self.camera_motion:
             # send a cancelation signal to motion detection.
             # handle_motion_detect_done will be called once it has stopped
-            self.camera_motion.cancel()
+            self.camera_motion.stop()
 
     async def handle_motion_detect_done(self):
         if hasattr(self, 'camera_motion') and self.camera_motion:
