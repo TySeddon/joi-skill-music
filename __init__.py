@@ -64,8 +64,9 @@ class JoiMusicSkill(MycroftSkill):
         # setup camera
         self.camera = self.setup_camera()
         if self.camera:
+            self.motion_loop = asyncio.new_event_loop()
             self.camera_operator = CameraOperator(self.camera)
-            self.camera_motion = MotionDetection(self.camera)
+            self.camera_motion = MotionDetection(self.camera, self.motion_loop)
             self.camera_operator.set_privacy_mode(False)
             self.camera_operator.set_absolute_position(180,0,0)
             self.camera_operator.set_absolute_position(180,30,0)
@@ -128,8 +129,7 @@ class JoiMusicSkill(MycroftSkill):
     def start_motion_detection(self, seconds_length):
         if hasattr(self, 'camera_motion') and self.camera_motion:
             # start detecting motion
-            loop = asyncio.new_event_loop()
-            self.motion_task = loop.create_task(self.camera_motion.read_camera_motion_async(seconds_length))
+            self.motion_task = self.motion_loop.create_task(self.camera_motion.read_camera_motion_async(seconds_length))
             self.motion_task.add_done_callback(self.handle_motion_detect_done)
 
     def stop_motion_detection(self):

@@ -7,11 +7,11 @@ import sys
 
 class MotionDetection():
 
-    def __init__(self, camera) -> None:
+    def __init__(self, camera, loop) -> None:
         self.camera = camera
         self.is_done = False
         self.is_motion = False
-        self.cancellation_event = asyncio.Event()
+        self.cancellation_event = asyncio.Event(loop=loop)
 
     def build_motion_event(self,event_name):
         return munchify({
