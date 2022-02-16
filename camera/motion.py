@@ -60,16 +60,19 @@ class MotionDetection():
                 else:
                     yield done_task.result()
             
-    def cancel(self, cancellation_event):
+    def _cancel(self, cancellation_event):
         print("Canceling")
         cancellation_event.set()
+
+    def cancel(self):
+        self._cancel(self.cancellation_event)
 
     async def read_camera_motion_async(self, seconds_length):
 
         # setup cancellation after specified number of seconds
-        cancellation_event = asyncio.Event()
+        self.cancellation_event = asyncio.Event()
         loop = asyncio.get_event_loop()
-        loop.call_later(seconds_length, self.cancel, cancellation_event)
+        loop.call_later(seconds_length, self._cancel, self.cancellation_event)
 
         self._start()
 
@@ -91,7 +94,7 @@ class MotionDetection():
 
         # get events until number of seconds expire
         async_iter = self.camera.async_event_stream("VideoMotion")
-        async for event_str in self.cancellable_aiter(async_iter, cancellation_event):
+        async for event_str in self.cancellable_aiter(async_iter, self.cancellation_event):
             current_event = self.build_event_obj(event_str)
             #print(current_event)
             motion_events.append(current_event)
