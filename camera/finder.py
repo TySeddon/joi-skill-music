@@ -21,7 +21,7 @@ class CameraFinder():
             socket.setdefaulttimeout(timeout)
         else:
             # If devices not found, try increasing timeout
-            socket.setdefaulttimeout(0.2)
+            socket.setdefaulttimeout(1.0)
 
             try:
                 with closing(socket.socket()) as sock:
