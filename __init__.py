@@ -335,7 +335,7 @@ class JoiMusicSkill(MycroftSkill):
 
             wait_while_speaking()
 
-            sleep(5) # pause to let motion detection finish
+            sleep(10) # pause to let motion detection finish
 
             started = self.start_next_song(True)
             if not started:
