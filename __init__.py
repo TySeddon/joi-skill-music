@@ -142,14 +142,23 @@ class JoiMusicSkill(MycroftSkill):
         self.shutdown_event_loop(self.motion_loop)
 
     def start_motion_detection(self, seconds_length):
+        self.schedule_event(
+            self._start_motion_detection, when=None, data={seconds_length:seconds_length}, name="MotionDetection"
+        )
+
+    def _start_motion_detection(self, seconds_length):
         if hasattr(self, 'camera_motion') and self.camera_motion:
             self.log.info('starting motion detection')
             # start detecting motion
             #self.motion_task = self.motion_loop.create_task(self.camera_motion.read_camera_motion_async(seconds_length))
             #self.motion_task.add_done_callback(self.handle_motion_detect_done)
 
-            self.motion_thread = threading.Thread(target=self._run_motion_detection, args=[seconds_length])
-            self.motion_thread.start()
+            #self.motion_thread = threading.Thread(target=self._run_motion_detection, args=[seconds_length])
+            #self.motion_thread.start()
+
+            start_time, end_time, motion_event_pairs = asyncio.run(self.camera_motion.read_camera_motion_async(seconds_length, self.log))
+            self.log.info(f"Motion detection has completed successfully. {len(motion_event_pairs)} motion events occurred")
+            self.create_motion_report(start_time, end_time, motion_event_pairs)
 
     def stop_motion_detection(self):
         if hasattr(self, 'camera_motion') and self.camera_motion:
