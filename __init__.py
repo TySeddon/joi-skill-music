@@ -155,7 +155,7 @@ class JoiMusicSkill(MycroftSkill):
             self.log.info('stopping motion detection')
             #self.camera_motion.cancel()
             #sleep(1)
-            self.motion_loop.call_later(1, self.camera_motion.cancel)
+            self.motion_loop.call_soon(self.camera_motion.cancel)
             # if hasattr(self, 'motion_thread') and self.motion_thread:
             #     self.log.info('Joining thread')
             #     self.motion_thread.join()
@@ -170,6 +170,28 @@ class JoiMusicSkill(MycroftSkill):
             start_time, end_time, motion_event_pairs = future.result()
             # create a motion report
             self.create_motion_report(start_time, end_time, motion_event_pairs)
+            # shutdown motion loop
+            self.shutdown_event_loop(self.motion_loop)
+
+    def shutdown_event_loop(self, loop):
+        self.log.info('handle_motion_detect_done')
+        if loop:
+            # stop loop
+            self.log.info("Stopping event loop")
+            loop.stop()
+
+            self.log.info("Waiting for thread join")
+            self.motion_thread.join()
+
+            self.log.info("Waiting for tasks to complete")
+            # Find all running tasks:
+            pending = asyncio.Task.all_tasks()
+            # Run loop until tasks done:
+            loop.run_until_complete(asyncio.gather(*pending))
+
+            #self.log.info("Closing event loop")
+            # close loop
+            #loop.close()
 
     def create_motion_report(self, start_time, end_time, motion_event_pairs):
         self.log.info('create_motion_report')
