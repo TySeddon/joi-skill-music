@@ -153,11 +153,11 @@ class JoiMusicSkill(MycroftSkill):
             # send a cancelation signal to motion detection.
             # handle_motion_detect_done will be called once it has stopped
             self.log.info('stopping motion detection')
+            self.camera_motion.cancel()
             if hasattr(self, 'motion_thread') and self.motion_thread:
                 self.log.info('Joining thread')
                 self.motion_thread.join()
                 self.log.info('Thread joined')
-            self.camera_motion.cancel()
 
     async def handle_motion_detect_done(self):
         self.log.info('handle_motion_detect_done')
