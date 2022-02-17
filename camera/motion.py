@@ -62,8 +62,9 @@ class MotionDetection():
                     yield done_task.result()
             
     def _cancel(self, cancellation_event):
-        print("Canceling")
+        print("Sending Cancel Signal")
         cancellation_event.set()
+        print("Sent Cancel Signal")
 
     def cancel(self):
         self._cancel(self.cancellation_event)

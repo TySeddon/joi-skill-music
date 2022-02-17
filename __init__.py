@@ -146,6 +146,7 @@ class JoiMusicSkill(MycroftSkill):
             #self.motion_task = self.motion_loop.create_task(self.camera_motion.read_camera_motion_async(seconds_length))
             #self.motion_task.add_done_callback(self.handle_motion_detect_done)
 
+            seconds_length = 3
             self.motion_thread = threading.Thread(target=self._run_motion_detection, args=[seconds_length])
             self.motion_thread.start()
 

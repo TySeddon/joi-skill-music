@@ -48,8 +48,9 @@ class Spotify():
                 return munchify(joi_devices[0])
             else:
                 count += 1  
-                print("Device %s not found yet. Trying again." % (player_name))
-                sleep(1)     
+                #print("Device %s not found yet. Trying again." % (player_name))
+                sleep(1)   
+        print(f"Device {player_name} not found after {count} tries") 
         return None                          
 
     def start_playback(self, player_name, track_uri):
