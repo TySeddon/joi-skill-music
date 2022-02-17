@@ -196,9 +196,9 @@ class JoiMusicSkill(MycroftSkill):
             #self.log.info("Waiting for thread join")
             #self.motion_thread.join()
 
-            self.log.info("Closing event loop")
+            #self.log.info("Closing event loop")
             # close loop
-            loop.close()
+            #loop.close()
 
     def create_motion_report(self, start_time, end_time, motion_event_pairs):
         self.log.info('create_motion_report')
