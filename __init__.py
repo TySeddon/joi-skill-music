@@ -136,6 +136,7 @@ class JoiMusicSkill(MycroftSkill):
         self.log.info(motion_event_pairs)
 
     def start_motion_detection(self, seconds_length):
+        return
         if hasattr(self, 'camera_motion') and self.camera_motion:
             self.log.info('starting motion detection')
             # start detecting motion
