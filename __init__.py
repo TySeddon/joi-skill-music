@@ -143,12 +143,12 @@ class JoiMusicSkill(MycroftSkill):
 
     def start_motion_detection(self, seconds_length):
         self.schedule_event(
-            self._start_motion_detection, when=1, data={seconds_length:seconds_length}, name="MotionDetection"
+            self._start_motion_detection, when=1, data=None, name="MotionDetection"
         )
 
-    def _start_motion_detection(self, data):
+    def _start_motion_detection(self):
         if hasattr(self, 'camera_motion') and self.camera_motion:
-            seconds_length = data['seconds_length']
+            seconds_length = 30 # temporary hardcode
             self.log.info(f"starting motion detection. {seconds_length} seconds")
             # start detecting motion
             #self.motion_task = self.motion_loop.create_task(self.camera_motion.read_camera_motion_async(seconds_length))
