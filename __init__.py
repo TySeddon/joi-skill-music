@@ -339,14 +339,12 @@ class JoiMusicSkill(MycroftSkill):
 
             wait_while_speaking()
 
-            self.motion_loop.run_until_complete(self.camera_motion.wait_complete())
-
             #let motion detection finish
-            # wait_count = 0
-            # while self.motion_loop and self.motion_loop.is_running and wait_count < 10:
-            #     self.log.info("Waiting for motion event loop to finish")
-            #     sleep(1)
-            #     wait_count += 1
+            wait_count = 0
+            while self.motion_loop and self.motion_loop.is_running() and wait_count < 10:
+                self.log.info("Waiting for motion event loop to finish")
+                sleep(1)
+                wait_count += 1
 
             started = self.start_next_song(True)
             if not started:
