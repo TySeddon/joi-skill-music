@@ -147,6 +147,7 @@ class JoiMusicSkill(MycroftSkill):
             # start detecting motion
             #self.motion_task = self.motion_loop.create_task(self.camera_motion.read_camera_motion_async(seconds_length))
             #self.motion_task.add_done_callback(self.handle_motion_detect_done)
+
             self.motion_thread = threading.Thread(target=self._run_motion_detection, args=[seconds_length])
             self.motion_thread.start()
 
@@ -157,7 +158,7 @@ class JoiMusicSkill(MycroftSkill):
             self.log.info('stopping motion detection')
             #self.camera_motion.cancel()
             #sleep(1)
-            self.motion_loop.call_soon(self.camera_motion.cancel)
+            self.motion_loop.call_later(1, self.camera_motion.cancel)
             # if hasattr(self, 'motion_thread') and self.motion_thread:
             #     self.log.info('Joining thread')
             #     self.motion_thread.join()
