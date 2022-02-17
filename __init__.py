@@ -178,6 +178,12 @@ class JoiMusicSkill(MycroftSkill):
     def shutdown_event_loop(self, loop):
         self.log.info('shutdown_event_loop')
         if loop:
+            #self.log.info("Waiting for tasks to complete")
+            # Find all running tasks:
+            #pending = asyncio.all_tasks()
+            # Run loop until tasks done:
+            #loop.run_until_complete(asyncio.gather(*pending))
+
             # stop loop
             self.log.info("Stopping event loop")
             loop.stop()
@@ -185,11 +191,6 @@ class JoiMusicSkill(MycroftSkill):
             #self.log.info("Waiting for thread join")
             #self.motion_thread.join()
 
-            self.log.info("Waiting for tasks to complete")
-            # Find all running tasks:
-            pending = asyncio.all_tasks()
-            # Run loop until tasks done:
-            loop.run_until_complete(asyncio.gather(*pending))
 
             #self.log.info("Closing event loop")
             # close loop
