@@ -138,6 +138,8 @@ class JoiMusicSkill(MycroftSkill):
         start_time, end_time, motion_event_pairs = loop.run_until_complete(self.camera_motion.read_camera_motion_async(seconds_length, self.log))
         self.log.info(f"Motion detection has completed successfully. {len(motion_event_pairs)} motion events occurred")
         self.create_motion_report(start_time, end_time, motion_event_pairs)
+        # shutdown motion loop
+        self.shutdown_event_loop(self.motion_loop)
 
     def start_motion_detection(self, seconds_length):
         if hasattr(self, 'camera_motion') and self.camera_motion:
@@ -171,17 +173,17 @@ class JoiMusicSkill(MycroftSkill):
             # create a motion report
             self.create_motion_report(start_time, end_time, motion_event_pairs)
             # shutdown motion loop
-            await self.shutdown_event_loop(self.motion_loop)
+            self.shutdown_event_loop(self.motion_loop)
 
-    async def shutdown_event_loop(self, loop):
+    def shutdown_event_loop(self, loop):
         self.log.info('shutdown_event_loop')
         if loop:
             # stop loop
             self.log.info("Stopping event loop")
             loop.stop()
 
-            self.log.info("Waiting for thread join")
-            self.motion_thread.join()
+            #self.log.info("Waiting for thread join")
+            #self.motion_thread.join()
 
             self.log.info("Waiting for tasks to complete")
             # Find all running tasks:
@@ -332,7 +334,7 @@ class JoiMusicSkill(MycroftSkill):
 
             wait_while_speaking()
 
-            sleep(10)
+            sleep(1) # pause to let motion detection finish
 
             started = self.start_next_song(True)
             if not started:
