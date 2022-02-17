@@ -276,7 +276,9 @@ class JoiMusicSkill(MycroftSkill):
             return False
 
     def is_song_done(self):
-        if self.play_state.progress_pct > 0.05:
+        if not self.play_state.progress_pct:
+            return True
+        elif self.play_state.progress_pct > 0.05:
             return True
         else:
             return False
@@ -331,11 +333,14 @@ class JoiMusicSkill(MycroftSkill):
             self.spotify.pause_playback(self.player_name)
             self.song_followup(self.track)
 
-            # todo: generate motion report and submit to Joi server
-
             wait_while_speaking()
 
-            sleep(10) # pause to let motion detection finish
+            #let motion detection finish
+            wait_count = 0
+            while self.motion_loop and self.motion_loop.is_running and wait_count < 10:
+                self.log.info("Waiting for motion event loop to finish")
+                sleep(1)
+                wait_count += 1
 
             started = self.start_next_song(True)
             if not started:
