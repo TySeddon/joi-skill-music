@@ -133,7 +133,7 @@ class JoiMusicSkill(MycroftSkill):
     def _run_motion_detection(self, seconds_length):        
         loop = self.motion_loop
         asyncio.set_event_loop(loop)
-        start_time, end_time, motion_event_pairs = asyncio.run(self.camera_motion.read_camera_motion_async(seconds_length,loop))
+        start_time, end_time, motion_event_pairs = asyncio.run_coroutine_threadsafe(self.camera_motion.read_camera_motion_async(seconds_length), loop=loop)
         self.log.info(motion_event_pairs)
 
     def start_motion_detection(self, seconds_length):

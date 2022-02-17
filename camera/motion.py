@@ -68,12 +68,12 @@ class MotionDetection():
     def cancel(self):
         self._cancel(self.cancellation_event)
 
-    async def read_camera_motion_async(self, seconds_length, loop):
+    async def read_camera_motion_async(self, seconds_length):
 
         print("------read_camera_motion_async-------")
         # setup cancellation after specified number of seconds
         self.cancellation_event.clear()
-        #loop = asyncio.get_event_loop()
+        loop = asyncio.get_event_loop()
         loop.call_later(seconds_length, self._cancel, self.cancellation_event)
 
         self._start()
