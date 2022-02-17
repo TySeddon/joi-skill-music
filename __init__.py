@@ -199,6 +199,7 @@ class JoiMusicSkill(MycroftSkill):
             #self.log.info("Closing event loop")
             # close loop
             #loop.close()
+            pass
 
     def create_motion_report(self, start_time, end_time, motion_event_pairs):
         self.log.info('create_motion_report')
