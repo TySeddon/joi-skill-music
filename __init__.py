@@ -171,10 +171,10 @@ class JoiMusicSkill(MycroftSkill):
             # create a motion report
             self.create_motion_report(start_time, end_time, motion_event_pairs)
             # shutdown motion loop
-            self.shutdown_event_loop(self.motion_loop)
+            await self.shutdown_event_loop(self.motion_loop)
 
-    def shutdown_event_loop(self, loop):
-        self.log.info('handle_motion_detect_done')
+    async def shutdown_event_loop(self, loop):
+        self.log.info('shutdown_event_loop')
         if loop:
             # stop loop
             self.log.info("Stopping event loop")
@@ -331,6 +331,8 @@ class JoiMusicSkill(MycroftSkill):
             # todo: generate motion report and submit to Joi server
 
             wait_while_speaking()
+
+            sleep(10)
 
             started = self.start_next_song(True)
             if not started:
