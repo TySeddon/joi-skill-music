@@ -139,3 +139,9 @@ class MotionDetection():
             await asyncio.sleep(1)
             if self.is_done:
                 break
+
+    async def wait_complete(self):
+        while True:
+            await asyncio.sleep(1)
+            if self.is_done:
+                break
