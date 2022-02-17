@@ -136,7 +136,7 @@ class JoiMusicSkill(MycroftSkill):
         future = asyncio.run_coroutine_threadsafe(self.camera_motion.read_camera_motion_async(seconds_length), loop=loop)
         self.log.info("Launched motion detection thread")
         #future.add_done_callback(self.handle_motion_detect_done)
-        start_time, end_time, motion_event_pairs = future.result()
+        start_time, end_time, motion_event_pairs = future.result(5)
         self.log.info(motion_event_pairs)
 
     def start_motion_detection(self, seconds_length):
