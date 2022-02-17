@@ -143,7 +143,7 @@ class JoiMusicSkill(MycroftSkill):
 
     def start_motion_detection(self, seconds_length):
         self.schedule_event(
-            self._start_motion_detection, when=None, data={seconds_length:seconds_length}, name="MotionDetection"
+            self._start_motion_detection, when=1, data={seconds_length:seconds_length}, name="MotionDetection"
         )
 
     def _start_motion_detection(self, seconds_length):
