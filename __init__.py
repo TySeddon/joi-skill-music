@@ -187,7 +187,7 @@ class JoiMusicSkill(MycroftSkill):
 
             self.log.info("Waiting for tasks to complete")
             # Find all running tasks:
-            pending = asyncio.Task.all_tasks()
+            pending = asyncio.all_tasks()
             # Run loop until tasks done:
             loop.run_until_complete(asyncio.gather(*pending))
 
@@ -334,7 +334,7 @@ class JoiMusicSkill(MycroftSkill):
 
             wait_while_speaking()
 
-            sleep(10) # pause to let motion detection finish
+            sleep(5) # pause to let motion detection finish
 
             started = self.start_next_song(True)
             if not started:
