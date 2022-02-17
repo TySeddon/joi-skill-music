@@ -154,6 +154,7 @@ class JoiMusicSkill(MycroftSkill):
             # handle_motion_detect_done will be called once it has stopped
             self.log.info('stopping motion detection')
             self.camera_motion.cancel()
+            sleep(1)
             # if hasattr(self, 'motion_thread') and self.motion_thread:
             #     self.log.info('Joining thread')
             #     self.motion_thread.join()
@@ -171,10 +172,12 @@ class JoiMusicSkill(MycroftSkill):
 
     def create_motion_report(self, start_time, end_time, motion_event_pairs):
         self.log.info('create_motion_report')
+        self.log.info('==================================================================')
         if hasattr(self, 'camera_motion') and self.camera_motion:
             history = self.camera_motion.build_motion_history(start_time, end_time, motion_event_pairs)
             self.log.info(history)
             self.motion_report = ""
+        self.log.info('==================================================================')
 
     ##################################
 
