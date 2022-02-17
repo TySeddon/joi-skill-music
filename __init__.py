@@ -133,7 +133,7 @@ class JoiMusicSkill(MycroftSkill):
     def _run_motion_detection(self, seconds_length):        
         loop = self.motion_loop
         asyncio.set_event_loop(loop)
-        future = asyncio.run_coroutine_threadsafe(self.camera_motion.read_camera_motion_async(seconds_length), loop=loop)
+        future = asyncio.run_coroutine_threadsafe(self.camera_motion.read_camera_motion_async(seconds_length, self.log), loop=loop)
         self.log.info("Launched motion detection thread")
         future.add_done_callback(self.handle_motion_detect_done)
         start_time, end_time, motion_event_pairs = future.result()
@@ -147,7 +147,7 @@ class JoiMusicSkill(MycroftSkill):
             #self.motion_task.add_done_callback(self.handle_motion_detect_done)
 
             seconds_length = 3
-            self.motion_thread = threading.Thread(target=self._run_motion_detection, args=[seconds_length, self.log])
+            self.motion_thread = threading.Thread(target=self._run_motion_detection, args=[seconds_length])
             self.motion_thread.start()
 
     def stop_motion_detection(self):
