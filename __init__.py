@@ -190,8 +190,8 @@ class JoiMusicSkill(MycroftSkill):
             #loop.run_until_complete(asyncio.gather(*pending))
 
             # stop loop
-            self.log.info("Stopping event loop")
-            loop.stop()
+            #self.log.info("Stopping event loop")
+            #loop.stop()
 
             #self.log.info("Waiting for thread join")
             #self.motion_thread.join()
@@ -266,6 +266,8 @@ class JoiMusicSkill(MycroftSkill):
             if pauseFirst:
                 sleep(5)
             if self.stopped: return False
+            self.log.info("===========================================================")
+            self.log.info("===========================================================")
             self.log.info(f"Starting song {self.track.name}")
             self.song_intro(self.track)
             self.log.info(f"Song duration {self.track.duration_ms}ms")
