@@ -341,8 +341,9 @@ class JoiMusicSkill(MycroftSkill):
 
             #let motion detection finish
             wait_count = 0
-            while self.motion_loop and self.motion_loop.is_running() and wait_count < 10:
-                self.log.info("Waiting for motion event loop to finish")
+            while not self.camera_motion.is_done:
+                self.log.info("Waiting for motion detection to finish")
+                #self.stop_motion_detection()
                 sleep(1)
                 wait_count += 1
 

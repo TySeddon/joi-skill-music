@@ -64,6 +64,7 @@ class MotionDetection():
     def _cancel(self, cancellation_event):
         print("Sending Cancel Signal")
         cancellation_event.set()
+        self.is_done = True
         print("Sent Cancel Signal")
 
     def cancel(self):
