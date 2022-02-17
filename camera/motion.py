@@ -106,7 +106,6 @@ class MotionDetection():
                 pass # ignore this duplicate event
             else:
                 last_event = current_event   
-            print(last_event)
             self.is_motion = last_event.Event == "MotionStart"
 
         # end event collection
