@@ -162,7 +162,7 @@ class JoiMusicSkill(MycroftSkill):
             self.log.info('stopping motion detection')
             #self.camera_motion.cancel()
             #sleep(1)
-            self.motion_loop.call_later(1, self.camera_motion.cancel)
+            self.motion_loop.call_soon(self.camera_motion.cancel)
             # if hasattr(self, 'motion_thread') and self.motion_thread:
             #     self.log.info('Joining thread')
             #     self.motion_thread.join()
@@ -346,7 +346,7 @@ class JoiMusicSkill(MycroftSkill):
             wait_count = 0
             while not self.camera_motion.is_done and wait_count < 10:
                 self.log.info("Waiting for motion detection to finish")
-                #self.stop_motion_detection()
+                self.stop_motion_detection()
                 sleep(1)
                 wait_count += 1
 
