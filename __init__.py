@@ -297,8 +297,8 @@ class JoiMusicSkill(MycroftSkill):
                 retry_count += 1
 
             # wait for tasks in event loop to finish
-            pending_tasks = asyncio.all_tasks(self.motion_loop)                
-            self.motion_loop.run_until_complete(asyncio.gather(*pending_tasks))
+            #pending_tasks = asyncio.all_tasks(self.motion_loop)                
+            #self.motion_loop.run_until_complete(asyncio.gather(*pending_tasks))
 
             started = self.start_next_song(True)
             if not started:
