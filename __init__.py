@@ -296,12 +296,13 @@ class JoiMusicSkill(MycroftSkill):
             self.song_followup(self.track)
             wait_while_speaking()
 
-            #let motion detection finish
-            retry_count = 0
-            while not self.camera_motion.is_done and retry_count < 10:
-                self.log.info("Waiting for motion detection to finish")
-                sleep(1)
-                retry_count += 1
+            if hasattr(self, 'camera_motion') and self.camera_motion:
+                #let motion detection finish
+                retry_count = 0
+                while not self.camera_motion.is_done and retry_count < 10:
+                    self.log.info("Waiting for motion detection to finish")
+                    sleep(1)
+                    retry_count += 1
 
             started = self.start_next_song(True)
             if not started:
