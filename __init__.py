@@ -286,7 +286,6 @@ class JoiMusicSkill(MycroftSkill):
             self.spotify.fade_volume()
             self.spotify.pause_playback(self.player_name)
             self.song_followup(self.track)
-
             wait_while_speaking()
 
             #let motion detection finish
@@ -296,6 +295,10 @@ class JoiMusicSkill(MycroftSkill):
                 #self.stop_motion_detection()
                 sleep(1)
                 retry_count += 1
+
+            # wait for tasks in event loop to finish
+            pending_tasks = asyncio.all_tasks(self.motion_loop)                
+            self.motion_loop.run_until_complete(asyncio.gather(pending_tasks))
 
             started = self.start_next_song(True)
             if not started:
