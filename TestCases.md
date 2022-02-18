@@ -36,3 +36,14 @@ Given song is not playing
 when song starts
 then system says an intro dialog
 
+Given camera is configured and available
+when session starts
+then camera wakes up (leave privacy mode)
+
+Given camera is configured and available
+when skill is stopped
+then camera sleeps (goes into privacy mode)
+
+Given camera is NOT available
+when skill is started
+then operate as normal (just log the missing camera)

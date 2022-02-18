@@ -12,13 +12,11 @@ from time import sleep
 import uuid
 import os
 from amcrest import AmcrestCamera
-import socket
 import asyncio
 from .enviro import get_setting
 from .camera.motion import MotionDetection
 from .camera.operator import CameraOperator
 from .camera.finder import CameraFinder
-from ifaddr import get_adapters
 import threading
 
 class JoiMusicSkill(MycroftSkill):
@@ -67,8 +65,8 @@ class JoiMusicSkill(MycroftSkill):
         asyncio.set_event_loop(self.motion_loop)
         self.camera = self.setup_camera()
         if self.camera:
-            self.camera_operator = CameraOperator(self.camera)
-            self.camera_motion = MotionDetection(self.camera, self.motion_loop)
+            self.camera_operator = CameraOperator(self.camera, self.log)
+            self.camera_motion = MotionDetection(self.camera, self.motion_loop, self.log)
             self.set_privacy_mode(False)
             self.camera_operator.set_absolute_position(180,0,0)
             self.camera_operator.set_absolute_position(180,30,0)
@@ -79,14 +77,11 @@ class JoiMusicSkill(MycroftSkill):
 
         # login to Spotify
         self.spotify = Spotify()
-
         # get list of playlists
         playlists = self.spotify.get_playlists()
-
         # choose a playlist
         playlist = random.choice(playlists)
         tracks = self.spotify.get_playlist_tracks(playlist.id)
-
         # create a random set of tracks for this session
         self.session_tracks = self.shuffle_tracks(tracks)
 
@@ -99,107 +94,44 @@ class JoiMusicSkill(MycroftSkill):
 
     ##################################
 
-    def get_ip_addresses(self):
-        result = []
-        for iface in get_adapters():
-            for addr in iface.ips:
-                if addr.is_IPv4:
-                    result.append(addr.ip)
-        return result  
-
     def setup_camera(self):
         CAMERA_NAME = get_setting('camera_name')
         CAMERA_USERNAME = get_setting('camera_username')
         CAMERA_PASSWORD = get_setting('camera_password')
-        ip_addresses = [o for o in self.get_ip_addresses() if not o.startswith("169") and not o.startswith("127")]
-        self.log.info(ip_addresses)
-        if not ip_addresses:
-            self.log.error("Could not determine IP address")
-            return None
-        MY_IP_ADDRESS = ip_addresses[0]
-        subnet = f"{MY_IP_ADDRESS}/24"
 
-        self.log.info(f"Searching for camera '{CAMERA_NAME}' on subnet {subnet}")
-        finder = CameraFinder(CAMERA_NAME, CAMERA_USERNAME, CAMERA_PASSWORD)
-        found_devices = finder.scan_devices(subnet)
+        finder = CameraFinder(CAMERA_NAME, CAMERA_USERNAME, CAMERA_PASSWORD, self.log)
+        found_devices = finder.scan_devices()
         if not found_devices:
-            self.log.error(f"Camera '{CAMERA_NAME}' not found on subnet {subnet}")
+            self.log.error(f"Camera '{CAMERA_NAME}' not found on subnet {finder.subnet}")
             return None
         camera_ip_address = found_devices[0]
         self.log.info(f"Found camera at {camera_ip_address}")
+
         camera = AmcrestCamera(camera_ip_address, 80, CAMERA_USERNAME, CAMERA_PASSWORD).camera
         return camera
 
     def _run_motion_detection(self, seconds_length):        
         loop = self.motion_loop
         asyncio.set_event_loop(loop)
-        #future = asyncio.run_coroutine_threadsafe(self.camera_motion.read_camera_motion_async(seconds_length, self.log), loop=loop)
         self.log.info("Launched motion detection thread")
-        start_time, end_time, motion_event_pairs = loop.run_until_complete(self.camera_motion.read_camera_motion_async(seconds_length, self.log))
+        # asynchronously run the camera motion detection
+        # wait here until stop signal has been received (self.camera_motion.cancel)
+        start_time, end_time, motion_event_pairs = loop.run_until_complete(self.camera_motion.read_camera_motion_async(seconds_length))
         self.log.info(f"Motion detection has completed successfully. {len(motion_event_pairs)} motion events occurred")
         self.create_motion_report(start_time, end_time, motion_event_pairs)
-        # shutdown motion loop
-        self.shutdown_event_loop(self.motion_loop)
 
     def start_motion_detection(self, seconds_length):
         if hasattr(self, 'camera_motion') and self.camera_motion:
             self.log.info(f"starting motion detection. {seconds_length} seconds")
-            # start detecting motion
-            #self.motion_task = self.motion_loop.create_task(self.camera_motion.read_camera_motion_async(seconds_length))
-            #self.motion_task.add_done_callback(self.handle_motion_detect_done)
-
             self.motion_thread = threading.Thread(target=self._run_motion_detection, args=[seconds_length])
             self.motion_thread.start()
-
-            # start_time, end_time, motion_event_pairs = asyncio.run(self.camera_motion.read_camera_motion_async(seconds_length, self.log))
-            # self.log.info(f"Motion detection has completed successfully. {len(motion_event_pairs)} motion events occurred")
-            # self.create_motion_report(start_time, end_time, motion_event_pairs)
 
     def stop_motion_detection(self):
         if hasattr(self, 'camera_motion') and self.camera_motion:
             # send a cancelation signal to motion detection.
             # handle_motion_detect_done will be called once it has stopped
             self.log.info('stopping motion detection')
-            #self.camera_motion.cancel()
-            #sleep(1)
             self.motion_loop.call_soon(self.camera_motion.cancel)
-            # if hasattr(self, 'motion_thread') and self.motion_thread:
-            #     self.log.info('Joining thread')
-            #     self.motion_thread.join()
-            #     self.log.info('Thread joined')
-
-    async def handle_motion_detect_done(self, future):
-        self.log.info('handle_motion_detect_done')
-        if hasattr(self, 'camera_motion') and self.camera_motion:
-            # stop motion detection
-            self.camera_motion.stop()
-            # get motion data
-            start_time, end_time, motion_event_pairs = future.result()
-            # create a motion report
-            self.create_motion_report(start_time, end_time, motion_event_pairs)
-            # shutdown motion loop
-            self.shutdown_event_loop(self.motion_loop)
-
-    def shutdown_event_loop(self, loop):
-        self.log.info('shutdown_event_loop')
-        if loop:
-            #self.log.info("Waiting for tasks to complete")
-            # Find all running tasks:
-            #pending = asyncio.all_tasks()
-            # Run loop until tasks done:
-            #loop.run_until_complete(asyncio.gather(*pending))
-
-            # stop loop
-            #self.log.info("Stopping event loop")
-            #loop.stop()
-
-            #self.log.info("Waiting for thread join")
-            #self.motion_thread.join()
-
-            #self.log.info("Closing event loop")
-            # close loop
-            #loop.close()
-            pass
 
     def create_motion_report(self, start_time, end_time, motion_event_pairs):
         self.log.info('create_motion_report')
@@ -215,10 +147,19 @@ class JoiMusicSkill(MycroftSkill):
     def open_browser(self):
         self.player_name = f"Joi-{uuid.uuid4()}"
         url = f"{self.JOI_SERVER_URL}/joi/spotify?name={self.player_name}&token={self.spotify.access_token}"
-        webbrowser.open(url=url, autoraise=True)
+
+        retry_count = 0
+        success = False
+        while not success and retry_count < 3:
+            success = webbrowser.open(url=url, autoraise=True)
+            sleep(1)
+            retry_count += 1
 
     def close_browser(self):
-        os.system("killall chromium-browser")
+        try:
+            os.system("killall chromium-browser")
+        except:
+            self.log.warn("Error closing web browser")
 
     def session_end(self):
         self.log.info("session_end")
@@ -301,6 +242,8 @@ class JoiMusicSkill(MycroftSkill):
         self.spotify.resume_playback(self.player_name)
         self.play_state.is_playing = True
         self.start_monitor()
+
+    ###########################################
 
     def start_monitor(self):
         # Clear any existing event

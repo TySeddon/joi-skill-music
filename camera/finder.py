@@ -3,6 +3,7 @@ import socket
 from contextlib import closing
 from typing import List, Optional
 import threading
+from ifaddr import get_adapters
 
 class CameraFinder():
 
@@ -11,10 +12,29 @@ class CameraFinder():
     __PWGPSI_PORT = 3800
     __HTTP_PORT = 80
 
-    def __init__(self, camera_name, username, password) -> None:
+    def __init__(self, camera_name, username, password, log) -> None:
         self.camera_name = camera_name
         self.username = username
         self.password = password
+        self.log = log
+
+    def get_ip_addresses(self):
+        result = []
+        for iface in get_adapters():
+            for addr in iface.ips:
+                if addr.is_IPv4:
+                    result.append(addr.ip)
+        return result  
+
+    def get_my_subnet(self):
+        ip_addresses = [o for o in self.get_ip_addresses() if not o.startswith("169") and not o.startswith("127")]
+        self.log.info(ip_addresses)
+        if not ip_addresses:
+            self.log.error("Could not determine IP address")
+            return None
+        my_ip_address = ip_addresses[0]
+        subnet = f"{my_ip_address}/24"
+        return subnet
 
     def __raw_scan(self, ipaddr: str, timeout: Optional[float] = None) -> None:
         if timeout:
@@ -30,10 +50,10 @@ class CameraFinder():
                     #sock.connect((ipaddr, self.__PWGPSI_PORT))
                 with closing(socket.socket()) as sock:
                     sock.connect((ipaddr, self.__HTTP_PORT))
-                print(f"Found possible camera at {ipaddr}")                    
+                self.log.info(f"Found possible camera at {ipaddr}")                    
                 camera = AmcrestCamera(ipaddr, self.__HTTP_PORT, self.username, self.password).camera
                 if camera:
-                    print(f"Found '{camera.machine_name}' at {ipaddr}")
+                    self.log.info(f"Found '{camera.machine_name}' at {ipaddr}")
                     if camera.machine_name == self.camera_name:
                         self.amcrest_ips.append(ipaddr)
 
@@ -42,19 +62,15 @@ class CameraFinder():
                 pass
 
     def scan_devices(
-        self, subnet: str, timeout: Optional[float] = None
+        self, timeout: Optional[float] = None
     ) -> List[str]:
-        """
-        Scan cameras in a range of ips
 
-        Params:
-        subnet - subnet, i.e: 192.168.1.0/24
-                    if mask not used, assuming mask 24
+        subnet = self.get_my_subnet()
+        if not subnet:
+            return None
+        self.subnet = subnet            
 
-        timeout - timeout in sec
-
-        Returns:
-        """
+        self.log.info(f"Searching for camera '{self.camera_name}' on subnet {subnet}")
 
         # Maximum range from mask
         # Format is mask: max_range

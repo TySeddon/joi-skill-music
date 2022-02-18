@@ -7,8 +7,9 @@ import sys
 
 class MotionDetection():
 
-    def __init__(self, camera, loop) -> None:
+    def __init__(self, camera, loop, log) -> None:
         self.camera = camera
+        self.log = log
         self.is_done = False
         self.is_motion = False
         self.cancellation_event = asyncio.Event(loop=loop)
@@ -49,31 +50,29 @@ class MotionDetection():
             for done_task in done:
                 if done_task == cancellation_task:
                     # clean up the async iterator
-                    print("cleaning up")
+                    self.log.info("cleaning up async iterator")
                     next_result_task.cancel()
                     try:
                         await result_iter.aclose()
                     except Exception as error:
                         pass                        
-                    print("cleaned up")
+                    self.log.info("cleaned up async iterator")
 
                     break
                 else:
                     yield done_task.result()
             
     def _cancel(self, cancellation_event):
-        print("Sending Cancel Signal")
+        self.log.info("Sending Cancel Signal")
         cancellation_event.set()
         self.is_done = True
-        print("Sent Cancel Signal")
+        self.log.info("Sent Cancel Signal")
 
     def cancel(self):
         self._cancel(self.cancellation_event)
 
-    async def read_camera_motion_async(self, seconds_length, log):
-
-        log.info("------read_camera_motion_async-------")
-        print("------read_camera_motion_async-------")
+    async def read_camera_motion_async(self, seconds_length):
+        self.log.info("read_camera_motion_async")
         # setup cancellation after specified number of seconds
         self.cancellation_event.clear()
         loop = asyncio.get_event_loop()
@@ -101,7 +100,6 @@ class MotionDetection():
         async_iter = self.camera.async_event_stream("VideoMotion")
         async for event_str in self.cancellable_aiter(async_iter, self.cancellation_event):
             current_event = self.build_event_obj(event_str)
-            #print(current_event)
             motion_events.append(current_event)
             if last_event and last_event.Event == "MotionStart" and current_event.Event == "MotionStop":
                 motion_event_pairs.append((last_event, current_event))
@@ -117,20 +115,20 @@ class MotionDetection():
             motion_event_pairs.append((last_event, ending_event))
         end_time = datetime.utcnow()
 
-        print("Done")
+        self.log.info("read_camera_motion_async - DONE")
         return (start_time, end_time, motion_event_pairs)
 
 
     def build_motion_history(self, start_time, end_time, motion_event_pairs):
         num_of_seconds = (end_time-start_time).seconds
-        print(f"{start_time} to {end_time}.  {num_of_seconds} seconds.")
+        self.log.info(f"{start_time} to {end_time}.  {num_of_seconds} seconds.")
 
         history = []
         for current_time in (start_time + timedelta(seconds=n) for n in range(num_of_seconds)):
             self.is_motion = bool([p for p in motion_event_pairs if p[0].DateTime <= current_time <= p[1].DateTime])
-            print(f"{'X' if self.is_motion else '-'}", end='')
+            #print(f"{'X' if self.is_motion else '-'}", end='')
             history.append(int(self.is_motion))
-        sys.stdout.flush()        
+        #sys.stdout.flush()        
         return history
 
     async def report_loop(self):
