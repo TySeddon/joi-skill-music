@@ -121,7 +121,7 @@ class JoiMusicSkill(MycroftSkill):
 
         tasks = asyncio.all_tasks(self.motion_loop)
         for task in tasks:
-            self.log.info(f"Task {task.get_name()}", {task.done})
+            self.log.info(f"Task {task.get_name()}", {task.done()})
 
         self.create_motion_report(start_time, end_time, motion_event_pairs)
 
