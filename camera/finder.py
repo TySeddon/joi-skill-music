@@ -7,7 +7,6 @@ from ifaddr import get_adapters
 
 class CameraFinder():
 
-    amcrest_ips: List[str] = []
     __RTSP_PORT = 554
     __PWGPSI_PORT = 3800
     __HTTP_PORT = 80
@@ -17,6 +16,7 @@ class CameraFinder():
         self.username = username
         self.password = password
         self.log = log
+        self.amcrest_ips: List[str] = []
 
     def get_ip_addresses(self):
         result = []
@@ -61,9 +61,9 @@ class CameraFinder():
             except:
                 pass
 
-    def scan_devices(
-        self, timeout: Optional[float] = None
-    ) -> List[str]:
+    def scan_devices(self, timeout: Optional[float] = None) -> List[str]:
+
+        self.amcrest_ips: List[str] = []
 
         subnet = self.get_my_subnet()
         if not subnet:

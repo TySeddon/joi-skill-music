@@ -119,16 +119,18 @@ class JoiMusicSkill(MycroftSkill):
         start_time, end_time, motion_event_pairs = loop.run_until_complete(self.camera_motion.read_camera_motion_async(seconds_length))
         self.log.info(f"Motion detection has completed successfully. {len(motion_event_pairs)} motion events occurred")
 
-        tasks = asyncio.all_tasks(self.motion_loop)
-        for task in tasks:
-            self.log.info(f"Task {task.get_name()}, {task.done()}")
+        # tasks = asyncio.all_tasks(self.motion_loop)
+        # for task in tasks:
+        #     self.log.info(f"Task {task.get_name()}, {task.done()}")
 
         self.create_motion_report(start_time, end_time, motion_event_pairs)
 
     def start_motion_detection(self, seconds_length):
         if hasattr(self, 'camera_motion') and self.camera_motion:
             self.log.info(f"starting motion detection. {seconds_length} seconds")
-            self.motion_thread = threading.Thread(target=self._run_motion_detection, args=[seconds_length])
+            self.motion_thread = threading.Thread(
+                target=self._run_motion_detection, args=[seconds_length]
+            )
             self.motion_thread.start()
 
     def stop_motion_detection(self):
@@ -147,6 +149,10 @@ class JoiMusicSkill(MycroftSkill):
             self.motion_report = ""
         self.log.info('------------------------------------------------------------------------')
 
+    def set_privacy_mode(self, mode):
+        if hasattr(self, 'camera_operator') and self.camera_operator:
+            self.camera_operator.set_privacy_mode(mode)
+
     ##################################
 
     def open_browser(self):
@@ -159,6 +165,8 @@ class JoiMusicSkill(MycroftSkill):
             success = webbrowser.open(url=url, autoraise=True)
             sleep(1)
             retry_count += 1
+
+        return success            
 
     def close_browser(self):
         try:
@@ -281,7 +289,7 @@ class JoiMusicSkill(MycroftSkill):
         if self.is_song_done():
             # song is done, so follow-up with user and start next song
             self.stop_monitor()
-            self.stop_motion_detection()
+            self.stop_motion_detection() # send signal to stop motion detection
 
             self.spotify.fade_volume()
             self.spotify.pause_playback(self.player_name)
@@ -292,13 +300,8 @@ class JoiMusicSkill(MycroftSkill):
             retry_count = 0
             while not self.camera_motion.is_done and retry_count < 10:
                 self.log.info("Waiting for motion detection to finish")
-                #self.stop_motion_detection()
                 sleep(1)
                 retry_count += 1
-
-            # wait for tasks in event loop to finish
-            #pending_tasks = asyncio.all_tasks(self.motion_loop)                
-            #self.motion_loop.run_until_complete(asyncio.gather(*pending_tasks))
 
             started = self.start_next_song(True)
             if not started:
@@ -345,10 +348,6 @@ class JoiMusicSkill(MycroftSkill):
     #         return True
     #     else:
     #         return False        
-
-    def set_privacy_mode(self, mode):
-        if hasattr(self, 'camera_operator') and self.camera_operator:
-            self.camera_operator.set_privacy_mode(mode)
 
     def stop(self):
         """ The stop method is called anytime a User says "Stop" or a similar command. 
