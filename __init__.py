@@ -131,7 +131,7 @@ class JoiMusicSkill(MycroftSkill):
             # send a cancelation signal to motion detection.
             # handle_motion_detect_done will be called once it has stopped
             self.log.info('stopping motion detection')
-            self.motion_loop.call_soon(self.camera_motion.cancel)
+            self.motion_loop.call_later(1, self.camera_motion.cancel)
 
     def create_motion_report(self, start_time, end_time, motion_event_pairs):
         self.log.info('create_motion_report')
@@ -286,12 +286,12 @@ class JoiMusicSkill(MycroftSkill):
             wait_while_speaking()
 
             #let motion detection finish
-            wait_count = 0
-            while not self.camera_motion.is_done and wait_count < 10:
+            retry_count = 0
+            while not self.camera_motion.is_done and retry_count < 10:
                 self.log.info("Waiting for motion detection to finish")
                 self.stop_motion_detection()
                 sleep(1)
-                wait_count += 1
+                retry_count += 1
 
             started = self.start_next_song(True)
             if not started:
