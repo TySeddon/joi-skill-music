@@ -118,6 +118,11 @@ class JoiMusicSkill(MycroftSkill):
         # wait here until stop signal has been received (self.camera_motion.cancel)
         start_time, end_time, motion_event_pairs = loop.run_until_complete(self.camera_motion.read_camera_motion_async(seconds_length))
         self.log.info(f"Motion detection has completed successfully. {len(motion_event_pairs)} motion events occurred")
+
+        tasks = asyncio.all_tasks(self.motion_loop)
+        for task in tasks:
+            self.log.info(f"Task {task.get_name()}", {task.done})
+
         self.create_motion_report(start_time, end_time, motion_event_pairs)
 
     def start_motion_detection(self, seconds_length):
@@ -131,16 +136,16 @@ class JoiMusicSkill(MycroftSkill):
             # send a cancelation signal to motion detection.
             # handle_motion_detect_done will be called once it has stopped
             self.log.info('stopping motion detection')
-            self.motion_loop.call_later(1, self.camera_motion.cancel)
+            self.motion_loop.call_soon_threadsafe(self.camera_motion.cancel)
 
     def create_motion_report(self, start_time, end_time, motion_event_pairs):
         self.log.info('create_motion_report')
-        self.log.info('==================================================================')
+        self.log.info('------------------------------------------------------------------------')
         if hasattr(self, 'camera_motion') and self.camera_motion:
             history = self.camera_motion.build_motion_history(start_time, end_time, motion_event_pairs)
             self.log.info(history)
             self.motion_report = ""
-        self.log.info('==================================================================')
+        self.log.info('------------------------------------------------------------------------')
 
     ##################################
 
@@ -208,8 +213,7 @@ class JoiMusicSkill(MycroftSkill):
             if pauseFirst:
                 sleep(5)
             if self.stopped: return False
-            self.log.info("===========================================================")
-            self.log.info("===========================================================")
+            self.log.info("==============================================================================")
             self.log.info(f"Starting song {self.track.name}")
             self.song_intro(self.track)
             self.log.info(f"Song duration {self.track.duration_ms}ms")
@@ -289,7 +293,7 @@ class JoiMusicSkill(MycroftSkill):
             retry_count = 0
             while not self.camera_motion.is_done and retry_count < 10:
                 self.log.info("Waiting for motion detection to finish")
-                self.stop_motion_detection()
+                #self.stop_motion_detection()
                 sleep(1)
                 retry_count += 1
 
