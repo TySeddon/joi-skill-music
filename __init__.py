@@ -1,18 +1,16 @@
-from ast import Return
-from operator import truediv
+import os
 import random
+import asyncio
+import threading
+import webbrowser
+from uuid import uuid4
+from time import sleep
 from adapt.intent import IntentBuilder
 from mycroft import MycroftSkill, intent_handler
 from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel
 from mycroft.messagebus import Message
 from mycroft.audio import wait_while_speaking
-import webbrowser
-from time import sleep
-import uuid
-import os
 from amcrest import AmcrestCamera
-import asyncio
-import threading
 from joi_skill_utils.spotify import Spotify
 from joi_skill_utils.enviro import get_setting
 from joi_skill_utils.camera_motion import MotionDetection
@@ -157,7 +155,7 @@ class JoiMusicSkill(MycroftSkill):
     ##################################
 
     def open_browser(self):
-        self.player_name = f"Joi-{uuid.uuid4()}"
+        self.player_name = f"Joi-{uuid4()}"
         url = f"{self.JOI_SERVER_URL}/joi/spotify?name={self.player_name}&token={self.spotify.access_token}"
 
         retry_count = 0
