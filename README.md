@@ -26,11 +26,7 @@ Make script executable and writeable
 ## One-Time Raspberry Pi setup
     cd ~/mycroft-core        
     source venv-activate.sh  
-    pip install munch
-    pip install spotipy==2.19.0
-    pip install amcrest
-    pip install pandas
-    pip install ifaddr
+    pip install git+https://github.com/TySeddon/joi-skill-utils
 
 
 ### Chrome Configure
@@ -76,11 +72,7 @@ Chromse does not allow videos to automatically play (autoplay).  This can be ove
 # Required Packages
     pip install msk
     pip install adapt-parser
-    pip install munch
-    pip install spotipy
-    pip install amcrest
-    pip install pandas
-    pip install ifaddr
+    pip install git+https://github.com/TySeddon/joi-skill-utils
 
 ## Update requirements.txt
     pip freeze > requirements.txt
@@ -89,13 +81,3 @@ Chromse does not allow videos to automatically play (autoplay).  This can be ove
 Create your virtual environment, then load all the required dependencies with:
     pip install -r requirements.txt
 
-
-## Spotify API
-Based on simple REST principles, the Spotify Web API endpoints return JSON metadata about music artists, albums, and tracks, directly from the Spotify Data Catalogue.
-
-https://developer.spotify.com/documentation/web-api/reference/
-
-### Web Playback SDK
-The Spotify Web Playback SDK is a public JavaScript SDK that allows you to implement local streaming playback of Spotify content in their web applications.
-
-https://developer.spotify.com/documentation/web-playback-sdk/reference/

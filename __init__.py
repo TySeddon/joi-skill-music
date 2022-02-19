@@ -6,18 +6,19 @@ from mycroft import MycroftSkill, intent_handler
 from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel
 from mycroft.messagebus import Message
 from mycroft.audio import wait_while_speaking
-from .spotify import Spotify
 import webbrowser
 from time import sleep
 import uuid
 import os
 from amcrest import AmcrestCamera
 import asyncio
-from .enviro import get_setting
-from .camera.motion import MotionDetection
-from .camera.operator import CameraOperator
-from .camera.finder import CameraFinder
 import threading
+from joi_skill_utils.spotify import Spotify
+from joi_skill_utils.enviro import get_setting
+from joi_skill_utils.camera_motion import MotionDetection
+from joi_skill_utils.camera_operator import CameraOperator
+from joi_skill_utils.camera_finder import CameraFinder
+from joi_skill_utils.joiclient import JoiClient, PHOTO_TYPE
 
 class JoiMusicSkill(MycroftSkill):
 

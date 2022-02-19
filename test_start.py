@@ -7,7 +7,7 @@ import webbrowser
 from time import sleep
 from pprint import pprint
 import asyncio
-from enviro import get_setting
+from joi_skill_utils.enviro import get_setting
 
 JOI_SERVER_URL = get_setting('joi_server_url')
 
