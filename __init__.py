@@ -35,6 +35,12 @@ class JoiMusicSkill(MycroftSkill):
         self.stopped = False
         self.play_state = None
         self.spotify = None
+        self.camera_motion = None
+        self.camera_operator = None
+        self.motion_report = None
+        self.memorybox_session = None
+        self.session_media = None
+
         self.JOI_SERVER_URL = get_setting('joi_server_url')
 
     def initialize(self):
@@ -151,7 +157,7 @@ class JoiMusicSkill(MycroftSkill):
         self.create_motion_report(start_time, end_time, motion_event_pairs)
 
     def start_motion_detection(self, seconds_length):
-        if hasattr(self, 'camera_motion') and self.camera_motion:
+        if self.camera_motion:
             self.log.info(f"starting motion detection. {seconds_length} seconds")
             self.motion_thread = threading.Thread(
                 target=self._run_motion_detection, args=[seconds_length]
@@ -159,7 +165,7 @@ class JoiMusicSkill(MycroftSkill):
             self.motion_thread.start()
 
     def stop_motion_detection(self):
-        if hasattr(self, 'camera_motion') and self.camera_motion:
+        if self.camera_motion:
             # send a cancelation signal to motion detection.
             # handle_motion_detect_done will be called once it has stopped
             self.log.info('stopping motion detection')
@@ -168,11 +174,11 @@ class JoiMusicSkill(MycroftSkill):
     def create_motion_report(self, start_time, end_time, motion_event_pairs):
         self.log.info('create_motion_report')
         self.log.info('------------------------------------------------------------------------')
-        if hasattr(self, 'camera_motion') and self.camera_motion:
+        if self.camera_motion:
             history = self.camera_motion.build_motion_history(start_time, end_time, motion_event_pairs)
             report = {
-                'start_time':start_time,
-                'end_time':end_time,
+                'start_time':start_time.isoformat(),
+                'end_time':end_time.isoformat(),
                 'num_of_seconds': (end_time-start_time).seconds,
                 'motion_event_pairs': motion_event_pairs,
                 'history': history,
@@ -183,7 +189,7 @@ class JoiMusicSkill(MycroftSkill):
         self.log.info('------------------------------------------------------------------------')
 
     def set_privacy_mode(self, mode):
-        if hasattr(self, 'camera_operator') and self.camera_operator:
+        if self.camera_operator:
             self.camera_operator.set_privacy_mode(mode)
 
     ##################################
@@ -333,7 +339,7 @@ class JoiMusicSkill(MycroftSkill):
             self.end_memorybox_session_media(self.play_state.progress_pct)
             wait_while_speaking()
 
-            if hasattr(self, 'camera_motion') and self.camera_motion:
+            if self.camera_motion:
                 #let motion detection finish
                 retry_count = 0
                 while not self.camera_motion.is_done and retry_count < 10:
@@ -389,7 +395,7 @@ class JoiMusicSkill(MycroftSkill):
                                     start_method=start_method)
 
     def end_memorybox_session(self, end_method):
-        if hasattr(self, 'memorybox_session') and self.memorybox_session:
+        if self.memorybox_session:
             self.joi_client.end_MemoryBoxSession(
                             self.memorybox_session.memorybox_session_id,
                             session_end_method=end_method, 
@@ -397,7 +403,7 @@ class JoiMusicSkill(MycroftSkill):
             self.memorybox_session = None                        
 
     def start_memorybox_session_media(self, track):
-        if hasattr(self, 'memorybox_session') and self.memorybox_session:
+        if self.memorybox_session:
             self.session_media = self.joi_client.start_MemoryBoxSessionMedia(
                             memorybox_session_id=self.memorybox_session.memorybox_session_id, 
                             media_url=track.uri,
@@ -407,7 +413,7 @@ class JoiMusicSkill(MycroftSkill):
                             media_classification="NA")
 
     def end_memorybox_session_media(self, progress_pct):
-        if hasattr(self, 'session_media') and self.session_media:
+        if self.session_media:
             progress_pct = progress_pct if progress_pct else 0
             self.joi_client.end_MemoryBoxSessionMedia(
                             memorybox_session_media_id=self.session_media.memorybox_session_media_id, 
@@ -418,7 +424,7 @@ class JoiMusicSkill(MycroftSkill):
             self.session_media = None                        
 
     def add_media_interaction(self, event, data):
-        if hasattr(self, 'session_media') and self.session_media:
+        if self.session_media:
             progress_pct = self.play_state.progress_pct if self.play_state and self.play_state.progress_pct else None
             progress_pct = progress_pct if progress_pct else 0
             media_interaction = self.joi_client.add_MediaInteraction(
