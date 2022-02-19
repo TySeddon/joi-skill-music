@@ -186,7 +186,7 @@ class JoiMusicSkill(MycroftSkill):
                 'percent': round(sum(history)/len(history),2) if history else None
             }
             self.log.info(report)
-            self.motion_report = json.dumps(report)
+            self.motion_report = report
         self.log.info('------------------------------------------------------------------------')
 
     def set_privacy_mode(self, mode):
