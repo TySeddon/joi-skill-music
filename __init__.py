@@ -389,7 +389,7 @@ class JoiMusicSkill(MycroftSkill):
             progress_pct = progress_pct or 0
             self.joi_client.end_MemoryBoxSessionMedia(
                             memorybox_session_media_id=self.session_media.memorybox_session_media_id, 
-                            media_percent_completed = progress_pct,
+                            media_percent_completed = round(progress_pct,2),
                             resident_motion="NA", 
                             resident_utterances="NA", 
                             resident_self_reported_feeling="NA")
@@ -399,7 +399,7 @@ class JoiMusicSkill(MycroftSkill):
         if hasattr(self, 'session_media') and self.session_media:
             media_interaction = self.joi_client.add_MediaInteraction(
                             memorybox_session_media_id=self.session_media.memorybox_session_media_id, 
-                            media_percent_completed=progress_pct,
+                            media_percent_completed=round(progress_pct,2),
                             event=event,
                             data=data)
 
