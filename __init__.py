@@ -4,6 +4,7 @@ import random
 import asyncio
 import threading
 import webbrowser
+import json
 from uuid import uuid4
 from time import sleep
 from adapt.intent import IntentBuilder
@@ -169,8 +170,16 @@ class JoiMusicSkill(MycroftSkill):
         self.log.info('------------------------------------------------------------------------')
         if hasattr(self, 'camera_motion') and self.camera_motion:
             history = self.camera_motion.build_motion_history(start_time, end_time, motion_event_pairs)
-            self.log.info(history)
-            self.motion_report = ""
+            report = {
+                'start_time':start_time,
+                'end_time':end_time,
+                'num_of_seconds': (end_time-start_time).seconds,
+                'motion_event_pairs': motion_event_pairs,
+                'history': history,
+                'percent': sum(history)/len(history) if history else None
+            }
+            self.log.info(report)
+            self.motion_report = json.dumps(report)
         self.log.info('------------------------------------------------------------------------')
 
     def set_privacy_mode(self, mode):
@@ -339,11 +348,10 @@ class JoiMusicSkill(MycroftSkill):
                 return  
 
     def handle_motion_event(self, message):
-        progress_pct = self.play_state.progress_pct if self.play_state and self.play_state.progress_pct else None
         event_name = message.data.get('event')
         event_datetime = message.data.get('datetime')
         self.log.info(f"{event_name}, {event_datetime}, {type(event_datetime)}")
-        self.add_media_interaction(progress_pct=progress_pct, event=event_name, data=event_datetime)
+        self.add_media_interaction(event=event_name, data=event_datetime)
 
     def handle_listener_started(self, message):
         self.log.info("handle_listener_started")
@@ -404,13 +412,14 @@ class JoiMusicSkill(MycroftSkill):
             self.joi_client.end_MemoryBoxSessionMedia(
                             memorybox_session_media_id=self.session_media.memorybox_session_media_id, 
                             media_percent_completed = round(progress_pct,2),
-                            resident_motion="NA", 
+                            resident_motion=self.motion_report, 
                             resident_utterances="NA", 
                             resident_self_reported_feeling="NA")
             self.session_media = None                        
 
-    def add_media_interaction(self, progress_pct, event, data):
+    def add_media_interaction(self, event, data):
         if hasattr(self, 'session_media') and self.session_media:
+            progress_pct = self.play_state.progress_pct if self.play_state and self.play_state.progress_pct else None
             progress_pct = progress_pct if progress_pct else 0
             media_interaction = self.joi_client.add_MediaInteraction(
                             memorybox_session_media_id=self.session_media.memorybox_session_media_id, 
@@ -443,6 +452,7 @@ class JoiMusicSkill(MycroftSkill):
         """
         self.log.info("mycroft.stop")
         self.stopped = True
+        self.add_media_interaction(event="stop requested", data=None)
 
         self.set_privacy_mode(True)
 
@@ -469,6 +479,7 @@ class JoiMusicSkill(MycroftSkill):
         self.log.info("shutdown")
         self.stop_monitor()
         self.stop_idle_check()
+        self.add_media_interaction(event="shutdown", data=None)
         self.stop_memorybox_session("shutdown")
 
 
