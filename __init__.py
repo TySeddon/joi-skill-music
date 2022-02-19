@@ -176,11 +176,12 @@ class JoiMusicSkill(MycroftSkill):
         self.log.info('------------------------------------------------------------------------')
         if self.camera_motion:
             history = self.camera_motion.build_motion_history(start_time, end_time, motion_event_pairs)
+            pairs = [(p[0].isoformat(), p[1].isoformat()) for p in motion_event_pairs]
             report = {
                 'start_time':start_time.isoformat(),
                 'end_time':end_time.isoformat(),
                 'num_of_seconds': (end_time-start_time).seconds,
-                'motion_event_pairs': motion_event_pairs,
+                'motion_event_pairs': pairs,
                 'history': history,
                 'percent': sum(history)/len(history) if history else None
             }
