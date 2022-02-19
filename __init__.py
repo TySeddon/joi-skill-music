@@ -1,3 +1,4 @@
+from importlib import reload
 import os
 import random
 import asyncio
@@ -11,6 +12,9 @@ from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel
 from mycroft.messagebus import Message
 from mycroft.audio import wait_while_speaking
 from amcrest import AmcrestCamera
+import joi_skill_utils
+reload(joi_skill_utils)
+
 from joi_skill_utils.spotify import Spotify
 from joi_skill_utils.enviro import get_setting
 from joi_skill_utils.camera_motion import MotionDetection
