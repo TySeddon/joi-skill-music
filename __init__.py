@@ -183,7 +183,7 @@ class JoiMusicSkill(MycroftSkill):
                 'num_of_seconds': (end_time-start_time).seconds,
                 'motion_event_pairs': pairs,
                 'history': history,
-                'percent': sum(history)/len(history) if history else None
+                'percent': round(sum(history)/len(history),2) if history else None
             }
             self.log.info(report)
             self.motion_report = json.dumps(report)
@@ -357,7 +357,7 @@ class JoiMusicSkill(MycroftSkill):
     def handle_motion_event(self, message):
         event_name = message.data.get('event')
         event_datetime = message.data.get('datetime')
-        self.log.info(f"{event_name}, {event_datetime}, {type(event_datetime)}")
+        self.log.info(f"{event_name}, {event_datetime}")
         self.add_media_interaction(event=event_name, data=event_datetime)
 
     def handle_listener_started(self, message):
