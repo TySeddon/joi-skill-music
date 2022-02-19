@@ -16,7 +16,7 @@ from joi_skill_utils.enviro import get_setting
 from joi_skill_utils.camera_motion import MotionDetection
 from joi_skill_utils.camera_operator import CameraOperator
 from joi_skill_utils.camera_finder import CameraFinder
-from joi_skill_utils.joiclient import JoiClient, PHOTO_TYPE
+from joi_skill_utils.joiclient import JoiClient, MUSIC_TYPE
 
 class JoiMusicSkill(MycroftSkill):
 
@@ -57,7 +57,11 @@ class JoiMusicSkill(MycroftSkill):
         # stop the photo player (in case it is running)
         self.bus.emit(Message("skill.joi-skill-photo.stop"))
 
-        self.resident_name = "Ruth"
+        # establish connection to Joi server
+        joi_device_id = get_setting("device_id")
+        self.joi_client = JoiClient(joi_device_id)
+        resident = self.joi_client.get_Resident()
+        self.resident_name = resident.first_name
 
         # setup camera
         self.motion_loop = asyncio.new_event_loop()
@@ -74,13 +78,29 @@ class JoiMusicSkill(MycroftSkill):
         self.speak_dialog(key="Session_Start", 
                           data={"resident_name": self.resident_name})
 
+
+        # get memory boxes. Choose one at random
+        memoryboxes = self.joi_client.list_MemoryBoxes()
+        self.log.info(f"{len(memoryboxes)} memoryboxes found")
+        music_memoryboxes = list(filter(lambda o: o.memorybox_type == MUSIC_TYPE, memoryboxes))
+        self.log.info(f"{len(music_memoryboxes)} music_memoryboxes found")
+        music_memorybox = random.choice(music_memoryboxes)
+        self.log.info(f"Selected memory box '{music_memorybox.name}'")
+
+        # choose a playlist
+        playlist_id = music_memorybox.url
+        self.log.info(f"playlist_id = {playlist_id}")
+
+        # start the session
+        self.start_memorybox_session(music_memorybox, start_method)
+
         # login to Spotify
         self.spotify = Spotify()
         # get list of playlists
-        playlists = self.spotify.get_playlists()
+        #playlists = self.spotify.get_playlists()
         # choose a playlist
-        playlist = random.choice(playlists)
-        tracks = self.spotify.get_playlist_tracks(playlist.id)
+        #playlist = random.choice(playlists)
+        tracks = self.spotify.get_playlist_tracks(playlist_id)
         # create a random set of tracks for this session
         self.session_tracks = self.shuffle_tracks(tracks)
 
@@ -225,6 +245,7 @@ class JoiMusicSkill(MycroftSkill):
             self.song_intro(self.track)
             self.log.info(f"Song duration {self.track.duration_ms}ms")
             self.start_motion_detection(self.track.duration_ms / 1000)
+            self.start_memorybox_session_media(self.track)
             wait_while_speaking()
             self.spotify.start_playback(self.player_name, self.track.uri)
             self.spotify.max_volume()
@@ -293,6 +314,7 @@ class JoiMusicSkill(MycroftSkill):
             self.spotify.fade_volume()
             self.spotify.pause_playback(self.player_name)
             self.song_followup(self.track)
+            self.end_memorybox_session_media(self.play_state.progress_pct)
             wait_while_speaking()
 
             if hasattr(self, 'camera_motion') and self.camera_motion:
@@ -305,6 +327,7 @@ class JoiMusicSkill(MycroftSkill):
 
             started = self.start_next_song(True)
             if not started:
+                self.end_memorybox_session("normal completion")
                 self.session_end()      
                 return  
 
@@ -338,6 +361,54 @@ class JoiMusicSkill(MycroftSkill):
 
     ###########################################
 
+    def start_memorybox_session(self, music_memorybox, start_method):
+        self.memorybox_session = self.joi_client.start_MemoryBoxSession(
+                                    memorybox_id=music_memorybox.memorybox_id, 
+                                    start_method=start_method)
+
+    def end_memorybox_session(self, end_method):
+        if hasattr(self, 'memorybox_session') and self.memorybox_session:
+            self.joi_client.end_MemoryBoxSession(
+                            self.memorybox_session.memorybox_session_id,
+                            session_end_method=end_method, 
+                            resident_self_reported_feeling="NA")
+            self.memorybox_session = None                        
+
+    def start_memorybox_session_media(self, track):
+        if hasattr(self, 'memorybox_session') and self.memorybox_session:
+            self.session_media = self.joi_client.start_MemoryBoxSessionMedia(
+                            memorybox_session_id=self.memorybox_session.memorybox_session_id, 
+                            media_url=track.uri,
+                            media_name=track.name,
+                            media_artist=track.artists[0].name,
+                            media_tags="NA",
+                            media_classification="NA")
+
+    def end_memorybox_session_media(self, progress_pct):
+        if hasattr(self, 'session_media') and self.session_media:
+            progress_pct = progress_pct or 0
+            self.joi_client.end_MemoryBoxSessionMedia(
+                            memorybox_session_media_id=self.session_media.memorybox_session_media_id, 
+                            media_percent_completed = progress_pct,
+                            resident_motion="NA", 
+                            resident_utterances="NA", 
+                            resident_self_reported_feeling="NA")
+            self.session_media = None                        
+
+    def add_media_interaction(self, progress_pct, event, data):
+        if hasattr(self, 'session_media') and self.session_media:
+            media_interaction = self.joi_client.add_MediaInteraction(
+                            memorybox_session_media_id=self.session_media.memorybox_session_media_id, 
+                            media_percent_completed=progress_pct,
+                            event=event,
+                            data=data)
+
+    def stop_memorybox_session(self, end_method):
+        progress_pct = self.play_state.progress_pct if self.play_state and self.play_state.progress_pct else None
+        self.end_memorybox_session_media(progress_pct)
+        self.end_memorybox_session(end_method)
+
+    ###########################################
     # def converse(self, utterances, lang):
     #     """ The converse method can be used to handle follow up utterances 
     #     prior to the normal intent handling process. It can be useful for handling 
@@ -370,6 +441,7 @@ class JoiMusicSkill(MycroftSkill):
         if self.play_state:
             self.play_state.is_playing = False
         self.close_browser()
+        self.stop_memorybox_session("stop")
         return True
 
     def shutdown(self):
@@ -382,6 +454,7 @@ class JoiMusicSkill(MycroftSkill):
         self.log.info("shutdown")
         self.stop_monitor()
         self.stop_idle_check()
+        self.stop_memorybox_session("shutdown")
 
 
 def create_skill():

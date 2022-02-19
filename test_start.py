@@ -1,6 +1,6 @@
 from os import stat
 import pprint
-from spotify import Spotify
+from joi_skill_utils.spotify import Spotify
 import random
 import uuid
 import webbrowser
