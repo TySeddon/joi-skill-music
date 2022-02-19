@@ -283,6 +283,7 @@ class JoiMusicSkill(MycroftSkill):
         if self.stopped: return
 
         self.log.info("start_monitor")
+        self.last_motion_event = None
         # Schedule a new one every second to monitor Spotify play status
         self.schedule_repeating_event(
             self.monitor_play_state, None, 1, name="MonitorSpotify"
@@ -293,11 +294,20 @@ class JoiMusicSkill(MycroftSkill):
         self.log.info("stop_monitor")
         self.cancel_scheduled_event("MonitorSpotify")
         self.not_playing_count = 0
+        self.last_motion_event = None
 
     def monitor_play_state(self):
         self.play_state = self.spotify.get_playback_state()
         if self.play_state.progress_pct:
             self.log.info('%.2f %% - Playing=%s - %s - Vol=%.0f %%' % (self.play_state.progress_pct * 100, self.play_state.is_playing, self.track.name, self.play_state.volume_pct))
+
+        # record some interactions
+        if hasattr(self, 'camera_motion') and self.camera_motion and self.camera_motion.last_event:
+            if self.camera_motion.last_event != self.last_motion_event:
+                # if we detected a new motion event, record it as a media interaction
+                progress_pct = self.play_state.progress_pct if self.play_state and self.play_state.progress_pct else None
+                self.add_media_interaction(progress_pct=progress_pct, event=self.camera_motion.last_event, data=None)
+                self.last_motion_event = self.camera_motion.last_event
 
         if not self.play_state.is_playing:
             # if no longer playing, abandon polling after 60 seconds
