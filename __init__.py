@@ -41,6 +41,7 @@ class JoiMusicSkill(MycroftSkill):
         #self.add_event("mycroft.stop", self.stop)
         self.add_event("recognizer_loop:record_begin", self.handle_listener_started)
         self.add_event("skill.joi-skill-music.stop", self.stop)
+        self.add_event("skill.joi-skill-utils.motion_event", self.handle_motion_event)
 
     ###########################################
 
@@ -69,7 +70,7 @@ class JoiMusicSkill(MycroftSkill):
         self.camera = self.setup_camera()
         if self.camera:
             self.camera_operator = CameraOperator(self.camera, self.log)
-            self.camera_motion = MotionDetection(self.camera, self.motion_loop, self.log)
+            self.camera_motion = MotionDetection(self.camera, self.motion_loop, self.log, self.bus)
             self.set_privacy_mode(False)
             self.camera_operator.set_absolute_position(180,0,0)
             self.camera_operator.set_absolute_position(180,30,0)
@@ -301,16 +302,6 @@ class JoiMusicSkill(MycroftSkill):
         if self.play_state.progress_pct:
             self.log.info('%.2f %% - Playing=%s - %s - Vol=%.0f %%' % (self.play_state.progress_pct * 100, self.play_state.is_playing, self.track.name, self.play_state.volume_pct))
 
-        # record some interactions
-        if hasattr(self, 'camera_motion') and self.camera_motion:
-            if hasattr(self.camera_motion, 'last_event') and self.camera_motion.last_event:
-                if self.camera_motion.last_event != self.last_motion_event:
-                    # if we detected a new motion event, record it as a media interaction
-                    progress_pct = self.play_state.progress_pct if self.play_state and self.play_state.progress_pct else None
-                    self.log.info(self.camera_motion.last_event)
-                    self.add_media_interaction(progress_pct=progress_pct, event=self.camera_motion.last_event, data=None)
-                    self.last_motion_event = self.camera_motion.last_event
-
         if not self.play_state.is_playing:
             # if no longer playing, abandon polling after 60 seconds
             self.not_playing_count += 1
@@ -342,6 +333,13 @@ class JoiMusicSkill(MycroftSkill):
                 self.end_memorybox_session("normal completion")
                 self.session_end()      
                 return  
+
+    def handle_motion_event(self, message):
+        progress_pct = self.play_state.progress_pct if self.play_state and self.play_state.progress_pct else None
+        event_name = message.data.get('event')
+        event_datetime = message.data.get('datetime')
+        self.log.info(f"{event_name}, {event_datetime}, {type(event_datetime)}")
+        self.add_media_interaction(progress_pct=progress_pct, event=event_name, data=event_datetime)
 
     def handle_listener_started(self, message):
         self.log.info("handle_listener_started")
