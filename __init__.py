@@ -70,7 +70,7 @@ class JoiMusicSkill(MycroftSkill):
         self.camera = self.setup_camera()
         if self.camera:
             self.camera_operator = CameraOperator(self.camera, self.log)
-            self.camera_motion = MotionDetection(self.camera, self.motion_loop, self.log, self.bus)
+            self.camera_motion = MotionDetection(self.camera, self.motion_loop, self.log, message_bus=self.bus)
             self.set_privacy_mode(False)
             self.camera_operator.set_absolute_position(180,0,0)
             self.camera_operator.set_absolute_position(180,30,0)
