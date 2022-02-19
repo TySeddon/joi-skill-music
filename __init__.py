@@ -70,7 +70,7 @@ class JoiMusicSkill(MycroftSkill):
         self.camera = self.setup_camera()
         if self.camera:
             self.camera_operator = CameraOperator(self.camera, self.log)
-            self.camera_motion = MotionDetection(self.camera, self.motion_loop, self.log, message_bus=self.bus)
+            self.camera_motion = MotionDetection(self.camera, self.motion_loop, self.log, self.bus)
             self.set_privacy_mode(False)
             self.camera_operator.set_absolute_position(180,0,0)
             self.camera_operator.set_absolute_position(180,30,0)
@@ -396,7 +396,7 @@ class JoiMusicSkill(MycroftSkill):
 
     def end_memorybox_session_media(self, progress_pct):
         if hasattr(self, 'session_media') and self.session_media:
-            progress_pct = progress_pct or 0
+            progress_pct = progress_pct if progress_pct else 0
             self.joi_client.end_MemoryBoxSessionMedia(
                             memorybox_session_media_id=self.session_media.memorybox_session_media_id, 
                             media_percent_completed = round(progress_pct,2),
@@ -407,6 +407,7 @@ class JoiMusicSkill(MycroftSkill):
 
     def add_media_interaction(self, progress_pct, event, data):
         if hasattr(self, 'session_media') and self.session_media:
+            progress_pct = progress_pct if progress_pct else 0
             media_interaction = self.joi_client.add_MediaInteraction(
                             memorybox_session_media_id=self.session_media.memorybox_session_media_id, 
                             media_percent_completed=round(progress_pct,2),
