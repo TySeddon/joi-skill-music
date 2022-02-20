@@ -264,8 +264,9 @@ class JoiMusicSkill(MycroftSkill):
             self.log.info(f"Starting song {self.track.name}")
             self.song_intro(self.track)
             self.log.info(f"Song duration {self.track.duration_ms}ms")
+            audio_features = self.spotify.get_audio_features(self.track.id)
+            self.start_memorybox_session_media(self.track, audio_features)
             self.start_motion_detection(self.track.duration_ms / 1000)
-            self.start_memorybox_session_media(self.track)
             wait_while_speaking()
             self.spotify.start_playback(self.player_name, self.track.uri)
             self.spotify.max_volume()
@@ -402,7 +403,7 @@ class JoiMusicSkill(MycroftSkill):
                             resident_self_reported_feeling="NA")
             self.memorybox_session = None                        
 
-    def start_memorybox_session_media(self, track):
+    def start_memorybox_session_media(self, track, audio_features):
         if self.memorybox_session:
             self.session_media = self.joi_client.start_MemoryBoxSessionMedia(
                             memorybox_session_id=self.memorybox_session.memorybox_session_id, 
@@ -410,7 +411,8 @@ class JoiMusicSkill(MycroftSkill):
                             media_name=track.name,
                             media_artist=track.artists[0].name,
                             media_tags="NA",
-                            media_classification="NA")
+                            media_classification="NA",
+                            media_features=audio_features)
 
     def end_memorybox_session_media(self, progress_pct):
         if self.session_media:
