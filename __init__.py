@@ -39,6 +39,8 @@ class JoiMusicSkill(MycroftSkill):
         self.motion_report = None
         self.memorybox_session = None
         self.session_media = None
+        self.track = None
+        self.audio_features = None
 
         self.JOI_SERVER_URL = get_setting('joi_server_url')
 
@@ -223,7 +225,7 @@ class JoiMusicSkill(MycroftSkill):
         sleep(5)
         self.close_browser()
 
-    def song_intro(self, track):
+    def song_intro(self, track, audio_features):
         self.log.info("song_intro")
         if self.stopped: return 
         self.speak_dialog(key="Song_Intro",
@@ -232,7 +234,7 @@ class JoiMusicSkill(MycroftSkill):
                                 "resident_name": self.resident_name,
                                 })
 
-    def song_followup(self, track):
+    def song_followup(self, track, audio_features):
         self.log.info("song_followup")
         if self.stopped: return 
         self.speak_dialog(key="Song_Followup",
@@ -262,10 +264,11 @@ class JoiMusicSkill(MycroftSkill):
             if self.stopped: return False
             self.log.info("==============================================================================")
             self.log.info(f"Starting song {self.track.name}")
-            self.song_intro(self.track)
             self.log.info(f"Song duration {self.track.duration_ms}ms")
-            audio_features = self.spotify.get_audio_features(self.track.id)
-            self.start_memorybox_session_media(self.track, audio_features)
+            self.audio_features = self.spotify.get_audio_features(self.track.id)
+            self.log.info(f"tempo = {self.audio_features.tempo}, danceability = {self.audio_features.danceability}, valence={self.audio_features.valence}, energy={self.audio_features.energy}")
+            self.song_intro(self.track, self.audio_features)
+            self.start_memorybox_session_media(self.track, self.audio_features)
             self.start_motion_detection(self.track.duration_ms / 1000)
             wait_while_speaking()
             self.spotify.start_playback(self.player_name, self.track.uri)
@@ -336,7 +339,7 @@ class JoiMusicSkill(MycroftSkill):
 
             self.spotify.fade_volume()
             self.spotify.pause_playback(self.player_name)
-            self.song_followup(self.track)
+            self.song_followup(self.track, self.audio_features)
             self.end_memorybox_session_media(self.play_state.progress_pct)
             wait_while_speaking()
 
