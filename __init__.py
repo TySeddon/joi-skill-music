@@ -427,7 +427,7 @@ class JoiMusicSkill(MycroftSkill):
         if self.session_media:
             progress_pct = self.play_state.progress_pct if self.play_state and self.play_state.progress_pct else None
             progress_pct = progress_pct if progress_pct else 0
-            elapsed_seconds = int(self.play_state.duration_ms/1000) if self.play_state and self.play_state.duration_ms else 0
+            elapsed_seconds = int(self.play_state.progress_ms/1000) if self.play_state and self.play_state.duration_ms else 0
             media_interaction = self.joi_client.add_MediaInteraction(
                             memorybox_session_media_id=self.session_media.memorybox_session_media_id, 
                             elapsed_seconds=elapsed_seconds,
