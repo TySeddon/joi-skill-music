@@ -414,7 +414,7 @@ class JoiMusicSkill(MycroftSkill):
             self.joi_client.end_MemoryBoxSessionMedia(
                             memorybox_session_media_id=self.session_media.memorybox_session_media_id, 
                             media_percent_completed = round(progress_pct,2),
-                            resident_motion=self.motion_report if self.motion_report else {}, 
+                            resident_motion=self.motion_report, 
                             resident_utterances="NA", 
                             resident_self_reported_feeling="NA")
             self.session_media = None                        
