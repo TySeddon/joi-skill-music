@@ -13,12 +13,34 @@ All of these Mycroft kills Manager (mycroft-msm) commands are executed on the Ra
 
 ### Bash Script to automate updating of skills
 In home director create file called update-skills.sh
-    #!/bin/sh
+    #!/bin/bash
+
+    echo "----Updating joi-skill-utils----"
+    cd ~/mycroft-core
+    source ./venv-activate.sh
+    pip install git+https://github.com/TySeddon/joi-skill-utils -q
+
     cd ~/mycroft-core/bin
+
     echo "----Uninstalling joi-skill-music----"
-    ./mycroft-msm remove joi-skill-music
+    ./mycroft-msm remove joi-skill-music.tyseddon
+    echo "----Uninstalling joi-skill-photo----"
+    ./mycroft-msm remove joi-skill-photo.tyseddon
+
     echo "----Installing joi-skill-music----"
     ./mycroft-msm install https://github.com/TySeddon/joi-skill-music.git
+    echo "----Installing joi-skill-photo----"
+    ./mycroft-msm install https://github.com/TySeddon/joi-skill-photo.git
+
+    echo "Clearing pycache"
+    py3clean /opt/mycroft
+    py3clean ~/mycroft-core
+
+    echo "Restarting Skills"
+    cd ~/mycroft-core
+    ./start-mycroft.sh skills restart
+
+
 
 Make script executable and writeable
     sudo chmod a+xw update-skills.sh
