@@ -115,7 +115,7 @@ class JoiMusicSkill(MycroftSkill):
         #playlist = random.choice(playlists)
         tracks = self.spotify.get_playlist_tracks(playlist_id)
         # create a random set of tracks for this session
-        self.session_tracks = self.shuffle_tracks(tracks)
+        self.session_tracks = self.arrange_tracks(tracks)
 
         # launch music player
         self.open_browser()
@@ -254,8 +254,29 @@ class JoiMusicSkill(MycroftSkill):
 
     ###########################################
 
-    def shuffle_tracks(self, tracks):
-         return random.sample(tracks,5)
+    def _build_pyramid(self, sorted_list):
+        """Take a sorted list and arrange it so the highest is in the middle
+        This results in a ramp-up and ramp-down
+        """
+        even = sorted_list[::2]
+        odd = sorted_list[1::2]
+        even.extend(reversed(odd))
+        return even
+
+    def arrange_tracks(self, tracks):
+         #return random.sample(tracks,5)
+
+        # add audio feature 'energy' to each track
+        for track in tracks:
+            features = self.spotify.get_audio_features(track.id)
+            track.energy = features.energy
+         # sort the list in place by energy
+        list.sort(tracks,key=lambda o: o.energy)
+        # arrange in a ramp-up, ramp-down pyramid
+        new_list = self._build_pyramid(tracks)
+        for track in new_list:
+            self.log.info(f"{track.energy}")
+        return new_list
 
     def get_next_track(self):
         if len(self.session_tracks) > 0:
@@ -499,6 +520,7 @@ class JoiMusicSkill(MycroftSkill):
         or that have initiated new processes.
         """
         self.log.info("shutdown")
+        self.set_privacy_mode(True)
         self.stop_monitor()
         self.stop_idle_check()
         self.add_media_interaction(event="shutdown", data=None)
