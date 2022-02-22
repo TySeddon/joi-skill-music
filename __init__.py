@@ -219,8 +219,8 @@ class JoiMusicSkill(MycroftSkill):
     def song_intro(self, track, audio_features, motion_report):
         self.log.info("song_intro")
         if self.stopped: return 
-        
-        if motion_report and motion_report.percent and motion_report.percent < 0.25:
+
+        if motion_report and motion_report.percent < 0.25:
             # if they weren't moving much in last song, encourage them to move
             self.speak_dialog(key="Song_EncourageMovement",
                             data={"artist_name": track.artists[0].name,
@@ -238,7 +238,7 @@ class JoiMusicSkill(MycroftSkill):
         self.log.info("song_followup")
         if self.stopped: return 
 
-        if motion_report and motion_report.percent and motion_report.percent > 0.75:
+        if motion_report and motion_report.percent > 0.75:
             # if they were moving in last song, praise them
             self.speak_dialog(key="Song_PraiseMovement",
                             data={"artist_name": track.artists[0].name,
