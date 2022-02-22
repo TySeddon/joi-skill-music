@@ -280,8 +280,7 @@ class JoiMusicSkill(MycroftSkill):
 
     def get_next_track(self):
         if len(self.session_tracks) > 0:
-            track = self.session_tracks.pop(0)
-            return track
+            return self.session_tracks.pop(0)
         else:
             return None
 
@@ -310,9 +309,9 @@ class JoiMusicSkill(MycroftSkill):
             return False
 
     def is_song_done(self):
-        if not self.play_state.progress_pct:
+        if self.play_state is None or self.play_state.progress_ms is None:
             return True
-        elif self.play_state.progress_pct > 0.05:
+        elif self.play_state.progress_ms / 1000 > 30:
             return True
         else:
             return False
