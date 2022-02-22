@@ -114,8 +114,8 @@ class JoiMusicSkill(MycroftSkill):
         # choose a playlist
         #playlist = random.choice(playlists)
         tracks = self.spotify.get_playlist_tracks(playlist_id)
-        # create a random set of tracks for this session
-        self.session_tracks = self.arrange_tracks(tracks)
+        track_subset = self.choose_tracks(tracks)
+        self.session_tracks = self.arrange_tracks(track_subset)
 
         # launch music player
         self.open_browser()
@@ -238,7 +238,7 @@ class JoiMusicSkill(MycroftSkill):
         self.log.info("song_followup")
         if self.stopped: return 
 
-        if motion_report and motion_report.percent > 0.75:
+        if motion_report and not (motion_report.percent is None) and motion_report.percent > 0.75:
             # if they were moving in last song, praise them
             self.speak_dialog(key="Song_PraiseMovement",
                             data={"artist_name": track.artists[0].name,
@@ -262,6 +262,9 @@ class JoiMusicSkill(MycroftSkill):
         odd = sorted_list[1::2]
         even.extend(reversed(odd))
         return even
+
+    def choose_tracks(self, tracks, n):
+        return random.sample(tracks, n)
 
     def arrange_tracks(self, tracks):
          #return random.sample(tracks,5)
