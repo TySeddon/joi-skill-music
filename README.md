@@ -48,6 +48,8 @@ Make script executable and writeable
 ## One-Time Raspberry Pi setup
     cd ~/mycroft-core        
     source venv-activate.sh  
+    pip install --upgrade numpy
+    pip install --upgrade pandas
     pip install git+https://github.com/TySeddon/joi-skill-utils
 
 

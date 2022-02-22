@@ -219,20 +219,38 @@ class JoiMusicSkill(MycroftSkill):
     def song_intro(self, track, audio_features):
         self.log.info("song_intro")
         if self.stopped: return 
-        self.speak_dialog(key="Song_Intro",
-                          data={"artist_name": track.artists[0].name,
-                                "song_name": track.name,
-                                "resident_name": self.resident_name,
-                                })
+        
+        if self.motion_report and self.motion_report.percent and self.motion_report.percent < 0.25:
+            # if they weren't moving much in last song, encourage them to move
+            self.speak_dialog(key="Song_EncourageMovement",
+                            data={"artist_name": track.artists[0].name,
+                                    "song_name": track.name,
+                                    "resident_name": self.resident_name,
+                                    })
+        else:
+            self.speak_dialog(key="Song_Intro",
+                            data={"artist_name": track.artists[0].name,
+                                    "song_name": track.name,
+                                    "resident_name": self.resident_name,
+                                    })
 
     def song_followup(self, track, audio_features):
         self.log.info("song_followup")
         if self.stopped: return 
-        self.speak_dialog(key="Song_Followup",
-                          data={"artist_name": track.artists[0].name,
-                                "song_name": track.name,
-                                "resident_name": self.resident_name,
-                                })
+
+        if self.motion_report and self.motion_report.percent and self.motion_report.percent > 0.75:
+            # if they were moving in last song, praise them
+            self.speak_dialog(key="Song_PraiseMovement",
+                            data={"artist_name": track.artists[0].name,
+                                    "song_name": track.name,
+                                    "resident_name": self.resident_name,
+                                    })
+        else:            
+            self.speak_dialog(key="Song_Followup",
+                            data={"artist_name": track.artists[0].name,
+                                    "song_name": track.name,
+                                    "resident_name": self.resident_name,
+                                    })
 
     ###########################################
 
