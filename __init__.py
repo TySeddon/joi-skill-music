@@ -216,11 +216,11 @@ class JoiMusicSkill(MycroftSkill):
         sleep(5)
         self.close_browser()
 
-    def song_intro(self, track, audio_features):
+    def song_intro(self, track, audio_features, motion_report):
         self.log.info("song_intro")
         if self.stopped: return 
         
-        if self.motion_report and self.motion_report.percent and self.motion_report.percent < 0.25:
+        if motion_report and motion_report.percent and motion_report.percent < 0.25:
             # if they weren't moving much in last song, encourage them to move
             self.speak_dialog(key="Song_EncourageMovement",
                             data={"artist_name": track.artists[0].name,
@@ -234,11 +234,11 @@ class JoiMusicSkill(MycroftSkill):
                                     "resident_name": self.resident_name,
                                     })
 
-    def song_followup(self, track, audio_features):
+    def song_followup(self, track, audio_features, motion_report):
         self.log.info("song_followup")
         if self.stopped: return 
 
-        if self.motion_report and self.motion_report.percent and self.motion_report.percent > 0.75:
+        if motion_report and motion_report.percent and motion_report.percent > 0.75:
             # if they were moving in last song, praise them
             self.speak_dialog(key="Song_PraiseMovement",
                             data={"artist_name": track.artists[0].name,
@@ -276,7 +276,7 @@ class JoiMusicSkill(MycroftSkill):
             self.log.info(f"Song duration {self.track.duration_ms}ms")
             self.audio_features = self.spotify.get_audio_features(self.track.id)
             self.log.info(f"tempo = {self.audio_features.tempo}, danceability = {self.audio_features.danceability}, valence={self.audio_features.valence}, energy={self.audio_features.energy}")
-            self.song_intro(self.track, self.audio_features)
+            self.song_intro(self.track, self.audio_features, self.motion_report)
             self.start_memorybox_session_media(self.track, self.audio_features)
             self.start_motion_detection(self.track.duration_ms / 1000)
             wait_while_speaking()
@@ -348,7 +348,7 @@ class JoiMusicSkill(MycroftSkill):
 
             self.spotify.fade_volume()
             self.spotify.pause_playback(self.player_name)
-            self.song_followup(self.track, self.audio_features)
+            self.song_followup(self.track, self.audio_features, self.motion_report)
             self.end_memorybox_session_media(self.play_state.progress_pct)
             wait_while_speaking()
 
