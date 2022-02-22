@@ -114,7 +114,7 @@ class JoiMusicSkill(MycroftSkill):
         # choose a playlist
         #playlist = random.choice(playlists)
         tracks = self.spotify.get_playlist_tracks(playlist_id)
-        track_subset = self.choose_tracks(tracks)
+        track_subset = self.choose_tracks(tracks, 5)
         self.session_tracks = self.arrange_tracks(track_subset)
 
         # launch music player
