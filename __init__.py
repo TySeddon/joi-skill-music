@@ -459,7 +459,7 @@ class JoiMusicSkill(MycroftSkill):
                             resident_self_reported_feeling="NA")
             self.session_media = None                        
 
-    def add_media_interaction(self, event, data):
+    def add_media_interaction(self, event, data, analysis=None):
         if self.session_media:
             progress_pct = self.play_state.progress_pct if self.play_state and self.play_state.progress_pct else None
             progress_pct = progress_pct if progress_pct else 0
@@ -469,7 +469,8 @@ class JoiMusicSkill(MycroftSkill):
                             elapsed_seconds=elapsed_seconds,
                             media_percent_completed=round(progress_pct,2),
                             event=event,
-                            data=data)
+                            data=data,
+                            analysis=analysis)
 
     def stop_memorybox_session(self, end_method):
         progress_pct = self.play_state.progress_pct if self.play_state and self.play_state.progress_pct else None
