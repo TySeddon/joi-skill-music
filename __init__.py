@@ -114,8 +114,7 @@ class JoiMusicSkill(MycroftSkill):
         # choose a playlist
         #playlist = random.choice(playlists)
         tracks = self.spotify.get_playlist_tracks(playlist_id)
-        track_subset = self.choose_tracks(tracks, 5)
-        self.session_tracks = self.arrange_tracks(track_subset)
+        self.session_tracks = self.arrange_tracks(tracks, 6)
 
         # launch music player
         self.open_browser()
@@ -263,23 +262,25 @@ class JoiMusicSkill(MycroftSkill):
         even.extend(reversed(odd))
         return even
 
-    def choose_tracks(self, tracks, n):
-        return random.sample(tracks, n)
-
-    def arrange_tracks(self, tracks):
+    def arrange_tracks(self, tracks, n):
          #return random.sample(tracks,5)
 
         # add audio feature 'energy' to each track
         for track in tracks:
             features = self.spotify.get_audio_features(track.id)
             track.energy = features.energy
-         # sort the list in place by energy
-        list.sort(tracks,key=lambda o: o.energy)
+        sorted_tracks = sorted(tracks,key=lambda o: o.energy)
+        # split list by slow and fast songs
+        # choose a few slow and fast songs
+        slow_songs = random.sample(sorted_tracks[:len(sorted_tracks)//2],n//2)
+        fast_songs = random.sample(sorted_tracks[len(sorted_tracks)//2:],n//2)
+        sorted_tracks_subset = sorted(slow_songs + fast_songs, key=lambda o: o.energy)
+
         # arrange in a ramp-up, ramp-down pyramid
-        new_list = self._build_pyramid(tracks)
-        for track in new_list:
+        result = self._build_pyramid(sorted_tracks_subset)
+        for track in result:
             self.log.info(f"{track.energy}")
-        return new_list
+        return result
 
     def get_next_track(self):
         if len(self.session_tracks) > 0:
