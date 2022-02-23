@@ -340,7 +340,6 @@ class JoiMusicSkill(MycroftSkill):
         if self.stopped: return
 
         self.log.info("start_monitor")
-        self.last_motion_event = None
         # Schedule a new one every second to monitor Spotify play status
         self.schedule_repeating_event(
             self.monitor_play_state, None, 1, name="MonitorSpotify"
@@ -351,7 +350,6 @@ class JoiMusicSkill(MycroftSkill):
         self.log.info("stop_monitor")
         self.cancel_scheduled_event("MonitorSpotify")
         self.not_playing_count = 0
-        self.last_motion_event = None
 
     def monitor_play_state(self):
         self.play_state = self.spotify.get_playback_state()
