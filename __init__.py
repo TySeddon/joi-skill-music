@@ -53,6 +53,7 @@ class JoiMusicSkill(MycroftSkill):
         #self.add_event("mycroft.stop", self.stop)
         self.add_event("recognizer_loop:record_begin", self.handle_listener_started)
         self.add_event("skill.joi-skill-music.stop", self.stop)
+        self.add_event("skill.joi-skill-music.start", self.start)
         self.add_event("skill.joi-skill-utils.motion_event", self.handle_motion_event)
 
     ###########################################
@@ -66,6 +67,8 @@ class JoiMusicSkill(MycroftSkill):
     def start(self, start_method):
         self.log.info("start")
         self.stopped = False
+        if not start_method:
+            start_method = "bus.event"
 
         # stop the photo player (in case it is running)
         self.bus.emit(Message("skill.joi-skill-photo.stop"))
