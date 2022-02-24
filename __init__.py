@@ -513,7 +513,7 @@ class JoiMusicSkill(MycroftSkill):
                 self.log.warn(f"Failed to pause of {self.player_name}")
         if self.play_state:
             self.play_state.is_playing = False
-        self.close_browser()
+        #self.close_browser()
         self.stop_memorybox_session("stop")
         return True
 
