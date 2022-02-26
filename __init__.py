@@ -64,7 +64,7 @@ class JoiMusicSkill(MycroftSkill):
         self.log.info("handle_play_music_intent")
         self.start(start_method=f"User said: {message.data['utterance']}")
 
-    def start(self, start_method="Auto"):
+    def start(self, start_method):
         self.log.info("start")
         self.stopped = False
         if not start_method:
@@ -108,6 +108,8 @@ class JoiMusicSkill(MycroftSkill):
         self.log.info(f"playlist_id = {playlist_id}")
 
         # start the session
+        if type(start_method).__name__ == "Message":
+            start_method = "Auto"
         self.start_memorybox_session(music_memorybox, start_method)
 
         # login to Spotify
