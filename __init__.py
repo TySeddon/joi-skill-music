@@ -201,7 +201,7 @@ class JoiMusicSkill(MycroftSkill):
         retry_count = 0
         success = False
         while not success and retry_count < 3:
-            success = webbrowser.open(url=url, autoraise=True)
+            success = webbrowser.open(url=url, new=0, autoraise=True)
             sleep(1)
             retry_count += 1
 
