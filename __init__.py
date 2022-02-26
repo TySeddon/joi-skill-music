@@ -53,7 +53,7 @@ class JoiMusicSkill(MycroftSkill):
         #self.add_event("mycroft.stop", self.stop)
         self.add_event("recognizer_loop:record_begin", self.handle_listener_started)
         self.add_event("skill.joi-skill-music.stop", self.stop)
-        self.add_event("skill.joi-skill-music.start", self.handle_play_music_intent)
+        self.add_event("skill.joi-skill-music.start", self.start)
         self.add_event("skill.joi-skill-utils.motion_event", self.handle_motion_event)
 
     ###########################################
@@ -64,7 +64,7 @@ class JoiMusicSkill(MycroftSkill):
         self.log.info("handle_play_music_intent")
         self.start(start_method=f"User said: {message.data['utterance']}")
 
-    def start(self, start_method):
+    def start(self, start_method="Auto"):
         self.log.info("start")
         self.stopped = False
         if not start_method:
