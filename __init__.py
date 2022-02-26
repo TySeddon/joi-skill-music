@@ -164,6 +164,7 @@ class JoiMusicSkill(MycroftSkill):
     def start_motion_detection(self, seconds_length):
         if self.camera_motion:
             self.log.info(f"starting motion detection. {seconds_length} seconds")
+            self.motion_report = None
             self.motion_thread = threading.Thread(
                 target=self._run_motion_detection, args=[seconds_length]
             )
@@ -183,6 +184,8 @@ class JoiMusicSkill(MycroftSkill):
             report = self.camera_motion.create_motion_report(start_time, end_time, motion_event_pairs)
             self.log.info(report)
             self.motion_report = report
+        else:
+            self.motion_report = None            
         self.log.info('------------------------------------------------------------------------')
 
     def set_privacy_mode(self, mode):
@@ -226,7 +229,7 @@ class JoiMusicSkill(MycroftSkill):
         self.log.info("song_intro")
         if self.stopped: return 
 
-        if motion_report and not (motion_report.percent is None) and motion_report.percent < 0.25:
+        if motion_report and (motion_report.percent is not None) and motion_report.percent < 0.25:
             # if they weren't moving much in last song, encourage them to move
             self.speak_dialog(key="Song_EncourageMovement",
                             data={"artist_name": track.artists[0].name,
@@ -244,7 +247,7 @@ class JoiMusicSkill(MycroftSkill):
         self.log.info("song_followup")
         if self.stopped: return 
 
-        if motion_report and not (motion_report.percent is None) and motion_report.percent > 0.75:
+        if motion_report and (motion_report.percent is not None) and motion_report.percent > 0.75:
             # if they were moving in last song, praise them
             self.speak_dialog(key="Song_PraiseMovement",
                             data={"artist_name": track.artists[0].name,
@@ -377,9 +380,6 @@ class JoiMusicSkill(MycroftSkill):
 
             self.spotify.fade_volume()
             self.spotify.pause_playback(self.player_name)
-            self.song_followup(self.track, self.audio_features, self.motion_report)
-            self.end_memorybox_session_media(self.play_state.progress_pct)
-            wait_while_speaking()
 
             if self.camera_motion:
                 #let motion detection finish
@@ -388,6 +388,10 @@ class JoiMusicSkill(MycroftSkill):
                     self.log.info("Waiting for motion detection to finish")
                     sleep(1)
                     retry_count += 1
+
+            self.song_followup(self.track, self.audio_features, self.motion_report)
+            self.end_memorybox_session_media(self.play_state.progress_pct)
+            wait_while_speaking()
 
             started = self.start_next_song(True)
             if not started:
