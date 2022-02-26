@@ -221,8 +221,8 @@ class JoiMusicSkill(MycroftSkill):
         self.set_privacy_mode(True)
         wait_while_speaking()
         sleep(5)
-        self.close_browser()
-        sleep(3)
+        #self.close_browser()
+        #sleep(3)
         self.bus.emit(Message("skill.joi-skill-mainmenu.show"))
 
     def song_intro(self, track, audio_features, motion_report):
@@ -521,8 +521,8 @@ class JoiMusicSkill(MycroftSkill):
                 self.log.warn(f"Failed to pause of {self.player_name}")
         if self.play_state:
             self.play_state.is_playing = False
-        self.close_browser()
-        sleep(3)
+        #self.close_browser()
+        #sleep(3)
         self.bus.emit(Message("skill.joi-skill-mainmenu.show"))
         self.stop_memorybox_session("stop")
         return True
