@@ -507,6 +507,8 @@ class JoiMusicSkill(MycroftSkill):
         or an expired alarm notification.
         """
         self.log.info("mycroft.stop")
+        if self.stopped: return
+
         self.stopped = True
         self.add_media_interaction(event="stop requested", data=None)
 
