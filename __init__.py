@@ -41,6 +41,7 @@ class JoiMusicSkill(MycroftSkill):
         self.session_media = None
         self.track = None
         self.audio_features = None
+        self.motion_thread = None
 
         self.JOI_SERVER_URL = get_setting('joi_server_url')
 
@@ -403,6 +404,10 @@ class JoiMusicSkill(MycroftSkill):
             self.spotify.pause_playback(self.player_name)
 
             self.wait_for_motion_detection_done()
+
+            if self.motion_thread:
+                self.log.info("Waiting for motion_thread.join")
+                self.motion_thread.join()
 
             self.song_followup(self.track, self.audio_features, self.motion_report)
             self.end_memorybox_session_media(self.play_state.progress_pct)
