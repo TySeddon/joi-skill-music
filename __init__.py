@@ -230,6 +230,7 @@ class JoiMusicSkill(MycroftSkill):
         if self.stopped: return 
 
         if motion_report and (motion_report.percent is not None) and motion_report.percent < 0.25:
+            self.log.info(f"MOVEMENT PERCENT {motion_report.percent}")
             # if they weren't moving much in last song, encourage them to move
             self.speak_dialog(key="Song_EncourageMovement",
                             data={"artist_name": track.artists[0].name,
@@ -248,6 +249,7 @@ class JoiMusicSkill(MycroftSkill):
         if self.stopped: return 
 
         if motion_report and (motion_report.percent is not None) and motion_report.percent > 0.75:
+            self.log.info(f"MOVEMENT PERCENT {motion_report.percent}")
             # if they were moving in last song, praise them
             self.speak_dialog(key="Song_PraiseMovement",
                             data={"artist_name": track.artists[0].name,
