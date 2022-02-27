@@ -372,7 +372,7 @@ class JoiMusicSkill(MycroftSkill):
                 self.log.info("Waiting for motion detection to finish")
                 sleep(1)
                 retry_count += 1
-                is_done = self.motion_loop.run_until_complete(self.camera_motion.check_done())        
+                is_done = not self.motion_thread.is_alive() and self.camera_motion.check_done()
 
     def monitor_play_state(self):
         self.play_state = self.spotify.get_playback_state()
@@ -391,8 +391,9 @@ class JoiMusicSkill(MycroftSkill):
             self.stop_monitor()
 
             if self.camera_motion:
-                is_done = self.motion_loop.run_until_complete(self.camera_motion.check_done())        
+                is_done = self.camera_motion.check_done()        
                 self.log.info(f"self.camera_motion.is_done = {is_done}")
+                self.log.info(f"self.motion_thread.is_alive = {self.motion_thread.is_alive()}")
 
             self.stop_motion_detection() # send signal to stop motion detection
 
