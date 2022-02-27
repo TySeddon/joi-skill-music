@@ -364,6 +364,16 @@ class JoiMusicSkill(MycroftSkill):
         self.cancel_scheduled_event("MonitorSpotify")
         self.not_playing_count = 0
 
+    def wait_for_motion_detection_done(self):
+        if self.camera_motion:
+            retry_count = 0
+            is_done = False
+            while not is_done and retry_count < 5:
+                self.log.info("Waiting for motion detection to finish")
+                sleep(1)
+                retry_count += 1
+                is_done = self.motion_loop.run_until_complete(self.camera_motion.check_done())        
+
     def monitor_play_state(self):
         self.play_state = self.spotify.get_playback_state()
         if self.play_state.progress_pct:
@@ -381,28 +391,17 @@ class JoiMusicSkill(MycroftSkill):
             self.stop_monitor()
 
             if self.camera_motion:
-                self.log.info(f"self.camera_motion.is_done = {self.camera_motion.is_done}")
+                is_done = self.motion_loop.run_until_complete(self.camera_motion.check_done())        
+                self.log.info(f"self.camera_motion.is_done = {is_done}")
 
             self.stop_motion_detection() # send signal to stop motion detection
 
-            if self.camera_motion:
-                #let motion detection finish
-                retry_count = 0
-                while not self.camera_motion.is_done and retry_count < 10:
-                    self.log.info("Waiting for motion detection to finish")
-                    sleep(1)
-                    retry_count += 1
+            self.wait_for_motion_detection_done()
 
             self.spotify.fade_volume()
             self.spotify.pause_playback(self.player_name)
 
-            if self.camera_motion:
-                #let motion detection finish
-                retry_count = 0
-                while not self.camera_motion.is_done and retry_count < 10:
-                    self.log.info("Waiting for motion detection to finish")
-                    sleep(1)
-                    retry_count += 1
+            self.wait_for_motion_detection_done()
 
             self.song_followup(self.track, self.audio_features, self.motion_report)
             self.end_memorybox_session_media(self.play_state.progress_pct)
