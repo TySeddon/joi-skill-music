@@ -379,7 +379,19 @@ class JoiMusicSkill(MycroftSkill):
         if self.is_song_done():
             # song is done, so follow-up with user and start next song
             self.stop_monitor()
+
+            if self.camera_motion:
+                self.log.info(f"self.camera_motion.is_done = {self.camera_motion.is_done}")
+
             self.stop_motion_detection() # send signal to stop motion detection
+
+            if self.camera_motion:
+                #let motion detection finish
+                retry_count = 0
+                while not self.camera_motion.is_done and retry_count < 10:
+                    self.log.info("Waiting for motion detection to finish")
+                    sleep(1)
+                    retry_count += 1
 
             self.spotify.fade_volume()
             self.spotify.pause_playback(self.player_name)
