@@ -89,6 +89,7 @@ class JoiMusicSkill(MycroftSkill):
             self.set_privacy_mode(False)
             self.camera_operator.set_absolute_position(180,0,0)
             self.camera_operator.set_absolute_position(180,30,0)
+        self.camera_motion = None
 
         # start the session
         self.speak_dialog(key="Session_Start", 
