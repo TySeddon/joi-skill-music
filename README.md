@@ -61,14 +61,14 @@ This upgrades browser on Raspberry Pi so that it can play Spotify
     sudo reboot
 
 #### Allow Sound to Auto Play
-Chromse does not allow videos to automatically play (autoplay).  This can be overridden in settings.
+Chrome does not allow videos to automatically play (autoplay).  This can be overridden in settings.
 1. Open chrome
 2. In URL type "chrome://settings/content/sound"
 3. Under "Customized behaviors", "Allowed to play sound", click "Add" button
 4. Enter the URLs that are allowed to auto play.
     * localhost:8000
-    * 127.0.01:8000
-    * joi-test-site.azurewebsites.net
+    * 127.0.0.1:8000
+    * joi-site.azurewebsites.net
 
 #### Play Protectect Content
 1. In your browser address bar, enter chrome://settings/content
